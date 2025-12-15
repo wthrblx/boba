@@ -13,17 +13,19 @@ export type Boba<T> = typeof(setmetatable(
 		expected: string,
 		error: string,
 		isType: (self: Boba<T>, x: unknown) -> (boolean, string?),
+		inner: T,
 	},
 	Boba
 ))
 
 local function define<T>(expected: string, isType: (self: Boba<T>, x: unknown) -> boolean): Boba<T>
-	return setmetatable({
+	local self = setmetatable({
 		expected = expected,
 		error = `Expected type \`{expected}\``,
 		isType = isType,
-		_T = nil :: any,
 	}, Boba)
+	self.inner = self :: any
+	return self
 end
 
 local function because(self: Boba<any>, reason: string)
@@ -38,10 +40,6 @@ end
 
 function Boba.__tostring(self: Boba<any>)
 	return `boba.Type<{self.expected}>`
-end
-
-function Boba.inner<T>(self: Boba<T>): T
-	return self :: any
 end
 
 function Boba.cast<T>(self: Boba<T>, x: any): T?
