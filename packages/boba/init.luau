@@ -1,6 +1,29 @@
 --!strict
 --!optimize 2
 
+--[[
+
+    ▄ █ ▀█▀ █ ▄  Welcome To Hell @ wthrblx.com
+     █▀█ █ █▀█   (c) Team Fireworks 2024-2026.
+
+    This software is provided 'as-is', without any express or implied
+    warranty. In no event will the authors be held liable for any damages
+    arising from the use of this software.
+
+    Permission is granted to anyone to use this software for any purpose,
+    including commercial applications, and to alter it and redistribute it
+    freely, subject to the following restrictions:
+
+    1. The origin of this software must not be misrepresented; you must not
+       claim that you wrote the original software. If you use this software
+       in a product, an acknowledgment in the product documentation would be
+       appreciated but is not required.
+    2. Altered source versions must be plainly marked as such, and must not be
+       misrepresented as being the original software.
+    3. This notice may not be removed or altered from any source distribution.
+
+]]
+
 --[=[
 	@class boba
 	@tag bobadocs-entry-point
@@ -52,7 +75,7 @@ function Boba.assert<T>(self: Boba<T>, x: any): T
 end
 
 function Boba.Nickname<T>(self: Boba<T>, name: string): Boba<T>
-	return define(name, self.isType)
+	return Boba.new(name, self.isType)
 end
 
 function Boba.Retype<T>(self: Boba<any>): Boba<T>
@@ -64,7 +87,7 @@ function Boba.Untype<T>(self: Boba<T>): Boba<any>
 end
 
 function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
-	return define(`({left.expected}) & ({right.expected})`, function(self, x)
+	return Boba.new(`({left.expected}) & ({right.expected})`, function(self, x)
 		local isLeft, leftError = left:isType(x)
 		if not isLeft then
 			local isRight, rightError = right:isType(x)
@@ -78,7 +101,7 @@ function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
 end
 
 function Boba.Or<L, R>(left: Boba<L>, right: Boba<R>): Boba<L | R>
-	return define(`{left.expected} | {right.expected}`, function(self, x)
+	return Boba.new(`{left.expected} | {right.expected}`, function(self, x)
 		local isLeft, leftError = left:isType(x)
 		local isRight, rightError = right:isType(x)
 		if isLeft or isRight then
@@ -89,7 +112,7 @@ function Boba.Or<L, R>(left: Boba<L>, right: Boba<R>): Boba<L | R>
 end
 
 function Boba.Optional<T>(inner: Boba<T>): Boba<T?>
-	return define(`({inner.expected})?`, function(self, x: unknown): boolean
+	return Boba.new(`({inner.expected})?`, function(self, x: unknown): boolean
 		if x == nil then
 			return true
 		end
@@ -98,7 +121,7 @@ function Boba.Optional<T>(inner: Boba<T>): Boba<T?>
 end
 
 function Boba.Literal<T>(literal: T, nickname: string?): Boba<T>
-	return define(nickname or tostring(literal), function(self, x)
+	return Boba.new(nickname or tostring(literal), function(self, x)
 		if rawequal(x, literal) then
 			return true
 		end
@@ -107,13 +130,13 @@ function Boba.Literal<T>(literal: T, nickname: string?): Boba<T>
 end
 
 function Boba.Typeof<T>(expected: string)
-	return define(expected, function(self, x: unknown): boolean
+	return Boba.new(expected, function(self, x: unknown): boolean
 		return typeof(x) == expected, self.error
 	end)
 end
 
 function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
-	return define(`\{ {values.expected} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ {values.expected} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
 			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
@@ -139,7 +162,7 @@ function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
 end
 
 function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
-	return define(`\{ [{keys.expected}]: {values.expected} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ [{keys.expected}]: {values.expected} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
 			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
@@ -161,7 +184,7 @@ function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
 end
 
 function Boba.Set<K>(keys: Boba<K>): Boba<{ [K]: true }>
-	return define(`\{ [{keys.expected}]: true \}`, function(self, x: any): boolean
+	return Boba.new(`\{ [{keys.expected}]: true \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
 			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
@@ -188,7 +211,7 @@ function Boba.Interface<T>(interface: T & { [string]: Boba<any> }): Boba<T>
 		table.insert(expectedPairs, `{key}: {value.expected}`)
 	end
 
-	return define(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
 			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
@@ -212,7 +235,7 @@ function Boba.ExhaustiveInterface<T>(interface: T & { [string]: Boba<any> }): Bo
 		table.insert(expectedPairs, `{key}: {value.expected}`)
 	end
 
-	return define(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
 			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
@@ -235,15 +258,15 @@ function Boba.ExhaustiveInterface<T>(interface: T & { [string]: Boba<any> }): Bo
 	end)
 end
 
-Boba.Any = define("any", function()
+Boba.Any = Boba.new("any", function()
 	return true
 end) :: Boba<any>
 
-Boba.Unknown = define("unknown", function()
+Boba.Unknown = Boba.new("unknown", function()
 	return true
 end) :: Boba<unknown>
 
-Boba.Never = define("never", function(self)
+Boba.Never = Boba.new("never", function(self)
 	return false, self.error
 end) :: Boba<never>
 
