@@ -18,7 +18,7 @@ export type Boba<T> = typeof(setmetatable(
 	Boba
 ))
 
-local function define<T>(expected: string, isType: (self: Boba<T>, x: unknown) -> boolean): Boba<T>
+function Boba.new<T>(expected: string, isType: (self: Boba<T>, x: unknown) -> boolean): Boba<T>
 	local self = setmetatable({
 		expected = expected,
 		error = `Expected type \`{expected}\``,
@@ -28,7 +28,7 @@ local function define<T>(expected: string, isType: (self: Boba<T>, x: unknown) -
 	return self
 end
 
-local function because(self: Boba<any>, reason: string)
+function Boba.because(self: Boba<any>, reason: string)
 	return `{self.error}\n...because {reason}`
 end
 
@@ -71,9 +71,9 @@ function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
 			if isRight then
 				return true
 			end
-			return false, because(self, `it isn't the right type: {rightError}`)
+			return false, self:because(`it isn't the right type: {rightError}`)
 		end
-		return false, because(self, `it isn't the left type: {leftError}`)
+		return false, self:because(`it isn't the left type: {leftError}`)
 	end)
 end
 
@@ -84,7 +84,7 @@ function Boba.Or<L, R>(left: Boba<L>, right: Boba<R>): Boba<L | R>
 		if isLeft or isRight then
 			return true
 		end
-		return false, because(self, `is not the left type: {leftError}: or the right type: {rightError}`)
+		return false, self:because(`is not the left type: {leftError}: or the right type: {rightError}`)
 	end)
 end
 
@@ -102,7 +102,7 @@ function Boba.Literal<T>(literal: T, nickname: string?): Boba<T>
 		if rawequal(x, literal) then
 			return true
 		end
-		return false, because(self, `only {literal} is accepted, but got {x}`)
+		return false, self:because(`only {literal} is accepted, but got {x}`)
 	end)
 end
 
@@ -115,7 +115,7 @@ end
 function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
 	return define(`\{ {values.expected} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
-			return false, because(self, `expected a table, but got {typeof(x)}`)
+			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
 
 		local expected = #x
@@ -125,12 +125,12 @@ function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
 			encountered += 1
 
 			if encountered > expected or typeof(key) ~= "number" then
-				return false, because(self, `because there's non-numeric indexes, such as key {tostring(key)}`)
+				return false, self:because(`because there's non-numeric indexes, such as key {tostring(key)}`)
 			end
 
 			local isValue, valueError = values:isType(value)
 			if not isValue then
-				return false, because(self, `at index #{key}: {valueError}`)
+				return false, self:because(`at index #{key}: {valueError}`)
 			end
 		end
 
@@ -141,18 +141,18 @@ end
 function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
 	return define(`\{ [{keys.expected}]: {values.expected} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
-			return false, because(self, `expected a table, but got {typeof(x)}`)
+			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
 
 		for key, value in pairs(x) do
 			local isKey, keyError = keys:isType(value)
 			if not isKey then
-				return false, because(self, `got unexpected key {key}: {keyError}`)
+				return false, self:because(`got unexpected key {key}: {keyError}`)
 			end
 
 			local isValue, valueError = values:isType(value)
 			if not isValue then
-				return false, because(self, `at key {key}: {valueError}`)
+				return false, self:because(`at key {key}: {valueError}`)
 			end
 		end
 
@@ -163,17 +163,17 @@ end
 function Boba.Set<K>(keys: Boba<K>): Boba<{ [K]: true }>
 	return define(`\{ [{keys.expected}]: true \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
-			return false, because(self, `expected a table, but got {typeof(x)}`)
+			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
 
 		for key, value in pairs(x) do
 			local isKey, keyError = keys:isType(value)
 			if not isKey then
-				return false, because(self, `got unexpected key {key}: {keyError}`)
+				return false, self:because(`got unexpected key {key}: {keyError}`)
 			end
 
 			if value ~= true then
-				return false, because(self, `expected literal \`true\`, but at key {key} got {value}`)
+				return false, self:because(`expected literal \`true\`, but at key {key} got {value}`)
 			end
 		end
 
@@ -190,14 +190,14 @@ function Boba.Interface<T>(interface: T & { [string]: Boba<any> }): Boba<T>
 
 	return define(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
-			return false, because(self, `expected a table, but got {typeof(x)}`)
+			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
 
 		for key, valueType in pairs(interface) do
 			local value = x[key]
 			local isValue, valueError = valueType:isType(value)
 			if not isValue then
-				return false, because(self, `value at key {tostring(key)}: {valueError}`)
+				return false, self:because(`value at key {tostring(key)}: {valueError}`)
 			end
 		end
 
@@ -214,20 +214,20 @@ function Boba.ExhaustiveInterface<T>(interface: T & { [string]: Boba<any> }): Bo
 
 	return define(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
 		if typeof(x) ~= "table" then
-			return false, because(self, `expected a table, but got {typeof(x)}`)
+			return false, self:because(`expected a table, but got {typeof(x)}`)
 		end
 
 		for key, valueType in pairs(interface) do
 			local value = x[key]
 			local isValue, valueError = valueType:isType(value)
 			if not isValue then
-				return false, because(self, `value at key {tostring(key)}: {valueError}`)
+				return false, self:because(`value at key {tostring(key)}: {valueError}`)
 			end
 		end
 
 		for key in pairs(x) do
 			if (interface :: any)[key] == nil then
-				return false, because(self, `{tostring(key)} isn't included in exhaustive interface`)
+				return false, self:because(`{tostring(key)} isn't included in exhaustive interface`)
 			end
 		end
 
