@@ -10,6 +10,10 @@ Boba is a general-purpose runtime typechecking library for Luau.
 - Choose between standalone Luau and Roblox flavored Boba
 - Great DX with helpful errors and rbxts typings included
 
+## License
+
+[Zlib License.](./LICENSE.md)
+
 ## Usage
 
 ### Installation
