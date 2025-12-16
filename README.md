@@ -1,8 +1,23 @@
-# Boba
+<h1>
+<img alt="Boba" src="./gh-assets/logo.png" />
+</h1>
 
-Boba is a best-of-all-worlds Luau runtime typechecking library.
+Boba is a general-purpose runtime typechecking library for Luau.
 
-## Installation
+- Zero `gt.build` or `:: any` with proper Luau type-safety
+- Deduplicate code by building Luau types and runtime types together
+- Significantly smaller LOCs compared to GreenTea, t, and ty
+- Choose between standalone Luau and Roblox flavored Boba
+- Great DX with helpful errors and rbxts typings included
+
+## Usage
+
+### Installation
+
+> [!WARNING]  
+> 
+> Work is in progress for automating package managers. For now, copy in whatever
+> packages you need into your codebase.
 
 ```sh
 # luau
@@ -13,8 +28,6 @@ npm install @rbxts/boba
 pnpm install @rbxts/boba
 bun install @rbxts/boba
 ```
-
-## Usage
 
 Define types with Boba's various constructors. These types can be tested against
 unknown objects:
@@ -110,6 +123,9 @@ expected type { cooldown: number, amount: DamageAmount }
 ......because only nil is accepted, but got Deadly
 ```
 
+> [!NOTE]  
+> Boba errors are a developing story and will further improve overtime!
+
 If you're in a rush, you can assert values:
 
 ```luau
@@ -120,9 +136,6 @@ local validatedData = Turret:assert(unknownData)
 print(validatedData.cooldown)
 ````
 
-> [!NOTE]  
-> Boba errors are a developing story and will further improve overtime!
-
 Congrats! You've learned all of what Boba offers.
 
 You can read the documentation (SOON) for all the other trinkets that
@@ -130,7 +143,7 @@ Boba exposes.
 
 ## Roblox
 
-TODO.
+### Installation
 
 ```sh
 # luau
@@ -140,6 +153,10 @@ npm install @rbxts/boba-roblox
 pnpm install @rbxts/boba-roblox
 bun install @rbxts/boba-roblox
 ```
+
+### Data Types
+
+### Instances
 
 ## Compatibility
 
