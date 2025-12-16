@@ -29,6 +29,8 @@ pnpm install @rbxts/boba
 bun install @rbxts/boba
 ```
 
+### Types
+
 Define types with Boba's various constructors. These types can be tested against
 unknown objects:
 
@@ -98,6 +100,8 @@ export type Turret = typeof(Turret.inner)
 > export type Turret = Boba.Infer<typeof Turret>
 > // still infers { cooldown: number, amount: number | "Lethal" | undefined }!
 > ```
+
+### Validation
 
 Use `check` to see if an unknown value matches the type, receiving an error
 message otherwise:
