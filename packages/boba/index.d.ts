@@ -21,7 +21,39 @@
 
 */
 
+type CheckResult = LuaTuple<[matches: true] | [matches: false, error: string]>;
+
 declare class Boba<T> {
+	constructor(
+		expected: string,
+		check: (self: Boba<T>, x: unknown) => CheckResult,
+	);
+
+	readonly inner: T;
+	readonly expected: string;
+	readonly error: string;
+
+	check(x: unknown): x is T;
+	check(x: unknown): CheckResult;
+	check(x: unknown): CheckResult;
+	cast(x: unknown): T | undefined;
+	assert(x: unknown): asserts x is T;
+	assert(x: unknown): T;
+
+	Nickname(nickname: string): this;
+	Retype<T>(): Boba<T>;
+	Untype(): Boba<any>;
+	And<L, R>(this: Boba<L>, right: Boba<R>): Boba<L & R>;
+	Or<L, R>(this: Boba<L>, right: Boba<R>): Boba<L | R>;
+	Optional<T>(this: Boba<T>): Boba<T | undefined>;
+
+	static Interface<T extends Record<string, Boba<any>>>(
+		interface: T,
+	): Boba<{ [K in keyof T]: T[K] extends Boba<infer V> ? V : T[K] }>;
+	static ExhaustiveInterface<T extends Record<string, Boba<any>>>(
+		interface: T,
+	): Boba<{ [K in keyof T]: T[K] extends Boba<infer V> ? V : T[K] }>;
+
 	static Any: Boba<any>;
 	static Unknown: Boba<unknown>;
 	static Never: Boba<never>;
@@ -33,7 +65,7 @@ declare class Boba<T> {
 	static String: Boba<string>;
 	static Table: Boba<object>;
 	static Thread: Boba<thread>;
-	static Vector: Boba<Vector>;
+	static Vector: Boba<vector>;
 }
 
 export = Boba;

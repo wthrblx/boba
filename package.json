@@ -1,0 +1,14 @@
+{
+	"name": "boba",
+	"private": true,
+	"devDependencies": {
+		"@rbxts/compiler-types": "^3.0.0-types.0",
+		"@rbxts/types": "^1.0.896"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"workspaces": [
+		"packages/*"
+	]
+}
