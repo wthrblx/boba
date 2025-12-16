@@ -270,7 +270,7 @@ Boba.Never = Boba.new("never", function(self)
 	return false, self.error
 end) :: Boba<never>
 
-Boba.Boolean = Boba.Typeof("number") :: Boba<boolean>
+Boba.Boolean = Boba.Typeof("boolean") :: Boba<boolean>
 Boba.Buffer = Boba.Typeof("buffer") :: Boba<buffer>
 Boba.Function = Boba.Typeof("function") :: Boba<(...any) -> ...any>
 Boba.Number = Boba.Typeof("number") :: Boba<number>
