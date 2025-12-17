@@ -26,9 +26,10 @@
 ]]
 
 local Boba = require("./boba")
-local Result, quote, quoteGot = Boba.Result, Boba.quote, Boba.quoteGot
+local Result, quoteGot = Boba.Result, Boba.quoteGot
 
 export type Boba<T> = Boba.Boba<T>
+export type Result = Boba.Result
 
 local ext = {}
 ext.IsA = {} :: Instances
