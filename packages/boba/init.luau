@@ -140,7 +140,7 @@ end
 function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
 	return Boba.new(`({left.expected}) & ({right.expected})`, function(self, x)
 		local isLeft, leftError = left:match(x)
-		if not isLeft then
+		if isLeft then
 			local isRight, rightError = right:match(x)
 			if isRight then
 				return true
@@ -236,7 +236,7 @@ function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
 		end
 
 		for key, value in pairs(x) do
-			local isKey, keyError = keys:match(value)
+			local isKey, keyError = keys:match(key)
 			if not isKey then
 				return false, self:because(`got unexpected key {key}: {keyError}`)
 			end
