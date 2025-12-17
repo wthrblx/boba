@@ -289,9 +289,9 @@ function Boba.Set<K>(keys: Boba<K>): Boba<{ [K]: true }>
 	end)
 end
 
-function Boba.Interface<T>(interface: T & { [string]: Boba<any> }): Boba<T>
+function Boba.Struct<T>(struct: T & { [string]: Boba<any> }): Boba<T>
 	local expectedPairs = { "[any]: any" }
-	for key, value in interface :: { [string]: Boba<any> } do
+	for key, value in struct :: { [string]: Boba<any> } do
 		-- TODO: key could be better formatted here
 		table.insert(expectedPairs, `{key}: {value.expected}`)
 	end
@@ -301,7 +301,7 @@ function Boba.Interface<T>(interface: T & { [string]: Boba<any> }): Boba<T>
 			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
 
-		for key, valueType in pairs(interface) do
+		for key, valueType in pairs(struct) do
 			local value = x[key]
 			local valueResult = valueType:match(value)
 			if not valueResult.ok then
@@ -313,9 +313,9 @@ function Boba.Interface<T>(interface: T & { [string]: Boba<any> }): Boba<T>
 	end)
 end
 
-function Boba.ExhaustiveInterface<T>(interface: T): Boba<T>
+function Boba.ExhaustiveStruct<T>(struct: T): Boba<T>
 	local expectedPairs = {}
-	for key, value in (interface :: any) :: { [string]: Boba<any> } do
+	for key, value in (struct :: any) :: { [string]: Boba<any> } do
 		-- TODO: key could be better formatted here
 		table.insert(expectedPairs, `{key}: {value.expected}`)
 	end
@@ -325,7 +325,7 @@ function Boba.ExhaustiveInterface<T>(interface: T): Boba<T>
 			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
 
-		for key, valueType: Boba<any> in pairs(interface :: any) do
+		for key, valueType: Boba<any> in pairs(struct :: any) do
 			local value = x[key]
 			local valueResult = valueType:match(value)
 			if not valueResult.ok then
@@ -334,8 +334,8 @@ function Boba.ExhaustiveInterface<T>(interface: T): Boba<T>
 		end
 
 		for key in pairs(x) do
-			if (interface :: any)[key] == nil then
-				return self:fail(`{quote(key)} isn't included in exhaustive interface`)
+			if (struct :: any)[key] == nil then
+				return self:fail(`{quote(key)} isn't included in exhaustive struct`)
 			end
 		end
 
@@ -367,6 +367,9 @@ Boba.Vector = Boba.Typeof("vector") :: Boba<vector>
 Boba.True = Boba.Literal(true):Untype() :: Boba<true>
 Boba.False = Boba.Literal(false):Untype() :: Boba<false>
 Boba.Nil = Boba.Literal(nil) :: Boba<nil>
+
+-- support for named imports in rbxts
+(Boba :: any).Boba = Boba
 
 table.freeze(Boba)
 return Boba

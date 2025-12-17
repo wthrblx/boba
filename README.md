@@ -77,11 +77,11 @@ local DamageAmount = Boba.String
 Now, `DamageAmount` will be printed as `DamageAmount` and not
 `number | "Lethal" | nil`.
 
-At runtime, `inner` references itself. This enables building interface types
+At runtime, `inner` references itself. This enables building struct types
 while resolving the correct types:
 
 ```luau
-local Turret = Boba.ExhaustiveInterface {
+local Turret = Boba.ExhaustiveStruct {
 	cooldown = Boba.Number.inner,
 	amount = DamageAmount.inner,
 }
@@ -91,10 +91,10 @@ export type Turret = typeof(Turret.inner)
 ````
 
 > [!TIP]  
-> For TypeScript users, you can omit `.inner` for interfaces:
+> For TypeScript users, you can omit `.inner` for structs:
 >
 > ```ts
-> const Turret = Boba.ExhaustiveInterface({
+> const Turret = Boba.ExhaustiveStruct({
 >     cooldown: Boba.Number,
 >     amount: DamageAmount,
 > })

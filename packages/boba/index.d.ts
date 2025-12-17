@@ -23,7 +23,7 @@
 
 type CheckResult = LuaTuple<[matches: true] | [matches: false, error: string]>;
 
-declare class Boba<T> {
+export class Boba<T> {
 	constructor(
 		expected: string,
 		check: (self: Boba<T>, x: unknown) => CheckResult,
@@ -57,11 +57,11 @@ declare class Boba<T> {
 		values: Boba<Vector2int16Constructor>,
 	): Boba<Map<K, V>>;
 	static Set<T>(keys: Boba<T>): Boba<Set<T>>;
-	static Interface<T extends Record<string, Boba<any>>>(
-		interface: T,
+	static Struct<T extends Record<string, Boba<any>>>(
+		struct: T,
 	): Boba<{ [K in keyof T]: T[K] extends Boba<infer V> ? V : T[K] }>;
-	static ExhaustiveInterface<T extends Record<string, Boba<any>>>(
-		interface: T,
+	static ExhaustiveStruct<T extends Record<string, Boba<any>>>(
+		struct: T,
 	): Boba<{ [K in keyof T]: T[K] extends Boba<infer V> ? V : T[K] }>;
 
 	static Any: Boba<any>;
@@ -77,5 +77,3 @@ declare class Boba<T> {
 	static Thread: Boba<thread>;
 	static Vector: Boba<vector>;
 }
-
-export = Boba;

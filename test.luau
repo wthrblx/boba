@@ -2,7 +2,7 @@ local Boba = require("./packages/boba")
 
 local DamageAmount = Boba.Number:Or(Boba.Literal("Lethal")):Or(Boba.Nil):Nickname("DamageAmount")
 
-local Turret = Boba.ExhaustiveInterface({
+local Turret = Boba.ExhaustiveStruct({
 	cooldown = Boba.Number,
 	amount = DamageAmount,
 })
