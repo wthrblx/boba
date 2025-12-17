@@ -26,6 +26,7 @@
 ]]
 
 local Boba = require("./boba")
+local Result, quote, quoteGot = Boba.Result, Boba.quote, Boba.quoteGot
 
 export type Boba<T> = Boba.Boba<T>
 
@@ -40,11 +41,11 @@ setmetatable(ext.IsA :: any, table.freeze({
 		local instanceBoba = Boba.new(className, function(self, x)
 			if typeof(x) == "Instance" then
 				if x:IsA(className) then
-					return true
+					return Result.ok
 				end
-				return false, self:because(`expected instance inherits {className}, but got {x:GetFullName()} ({x.ClassName})`)
+				return self:fail(`expected instance inherits {className}, but got {x:GetFullName()} ({x.ClassName})`)
 			end
-			return false, self:because(`expected an Instance, but got {x} ({typeof(x)}}`)
+			return self:fail(`expected an Instance, but {quoteGot(x)}`)
 		end)
 
 		self[className] = instanceBoba
@@ -57,11 +58,11 @@ setmetatable(ext.IsClass :: any, table.freeze({
 		local instanceBoba = Boba.new(className, function(self, x)
 			if typeof(x) == "Instance" then
 				if x.ClassName == className then
-					return true
+					return Result.ok
 				end
-				return false, self:because(`expected {className}, but got {x:GetFullName()} ({x.ClassName})`)
+				return self:fail(`expected instance inherits {className}, but got {x:GetFullName()} ({x.ClassName})`)
 			end
-			return false, self:because(`expected an Instance, but got {x} ({typeof(x)}}`)
+			return self:fail(`expected an Instance, but {quoteGot(x)}`)
 		end)
 
 		self[className] = instanceBoba

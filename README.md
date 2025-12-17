@@ -120,19 +120,22 @@ local isTurret, turretError = Turret:check(unknownData)
 print(isTurret, turretError)
 ```
 
-Boba will return helpful errors:
+Boba will return precise, helpful errors:
 
 ```
-expected type { cooldown: number, amount: DamageAmount }
-...because value at key amount: expected type DamageAmount
-......because is not the left type: expected type number | Lethal
-......because is not the left type: expected type number, but got Deadly (string): or the right type: expected type Lethal
-......because only Lethal is accepted, but got Deadly: or the right type: expected type nil
-......because only nil is accepted, but got Deadly
+expected { cooldown: number, amount: DamageAmount }
+> value at key "amount" (string)
+  expected DamageAmount
+  > did not match any of: number | Lethal, nil
+    expected nil
+    > only nil is accepted, but got "Deadly" (string)
+    expected number | Lethal
+    > did not match any of: number, Lethal
+      expected Lethal
+      > only Lethal is accepted, but got "Deadly" (string)
+      expected number
+      > got "Deadly" (string)
 ```
-
-> [!NOTE]  
-> Boba errors are a developing story and will further improve overtime!
 
 If you're in a rush, you can assert values:
 

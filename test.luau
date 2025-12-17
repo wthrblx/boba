@@ -12,4 +12,8 @@ local untrustedData = {
 	amount = "Deadly",
 }
 
-print(Turret:match(untrustedData))
+local result = Turret:match(untrustedData)
+if result.ok then
+else
+	print(result:format())
+end

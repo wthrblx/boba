@@ -24,91 +24,106 @@
 
 ]]
 
+local INDENT = "  "
+
+local function quote(x: any)
+	local xType = typeof(x)
+	if xType == "string" then
+		x = string.format("%q", x)
+	end
+	return `{x} ({xType})`
+end
+
+local function quoteGot(x: any)
+	return `got {quote(x)}`
+end
+
+local Result = {}
+Result.__index = Result
+
+export type ResultOk = typeof(setmetatable({} :: { ok: true }, Result))
+export type ResultFail = typeof(setmetatable(
+	{} :: { ok: false, expectedType: string, message: string, children: { Result } },
+	Result
+))
+
+export type Result = ResultOk | ResultFail
+
+Result.ok = table.freeze(setmetatable({ ok = true :: true }, Result)) :: Result
+
+function Result.fail(expectedType: string, message: string, children: { Result }?): Result
+	return setmetatable({
+		ok = false :: false,
+		expectedType = expectedType,
+		message = message,
+		children = children or {},
+	}, Result)
+end
+
+function Result.clone(self: Result)
+	return if self.ok then self else Result.fail(self.expectedType, self.message, self.children)
+end
+
+function Result.because(self: Result, sub: Result)
+	return if self.ok
+		then sub:clone()
+		elseif sub.ok then self:clone()
+		else Result.fail(self.expectedType, self.message, table.move(self.children, 1, #self.children, 2, { sub }))
+end
+
+function Result.format(self: Result, maybeIndent: string?): string
+	if self.ok then
+		return ""
+	end
+
+	local indent = maybeIndent or ""
+	local lines = {}
+
+	table.insert(lines, indent .. `expected {self.expectedType}`)
+	table.insert(lines, indent .. "> " .. self.message)
+	indent ..= INDENT
+
+	for _, sub in self.children do
+		if not sub.ok then
+			table.insert(lines, sub:format(indent))
+		end
+	end
+
+	return table.concat(lines, "\n")
+end
+
+function Result.__tostring(self: Result)
+	return self:format()
+end
+
+---
+
 local Boba = {}
 Boba.__index = Boba
+Boba.Result = Result
+Boba.quote = quote
+Boba.quoteGot = quoteGot
 
 export type BobaInner<T> = {
-	--[=[
-		@prop expected
-		@within Boba<T>
-		@since 1.0.0
-
-		A readable description of the type that the Boba represents.
-	]=]
 	expected: string,
-	--[=[
-		@prop error
-		@within Boba<T>
-		@since 1.0.0
-
-		Default error message used when validation fails.
-	]=]
-	error: string,
-	--[=[
-		@prop match
-		@within Boba<T>
-		@since 1.0.0
-
-		Given an unknown value, returns `true` if the Boba matches it's
-		type. Otherwise, returns `false` and an3 error message.
-	]=]
-	match: (self: Boba<T>, x: unknown) -> (boolean, string?),
-	--[=[
-		@prop inner
-		@within Boba<T>
-		@since 1.0.0
-
-		Represents the `T` type parameter. At runtime, this references
-		itself. This is most useful for building interfaces and fetching the
-		static `T` type.
-
-		@example
-
-		```luau
-		local Player = Boba.Interface {
-			name = Boba.String.inner,
-		 	xp = Boba.Number.inner,
-		}
-
-		export type Player = typeof(Player.inner)
-		```
-	]=]
+	match: (self: Boba<T>, x: unknown) -> Result,
 	inner: T,
 }
 
---[=[
-	@class Boba<T>
-	@since 1.0.0
-	@tag bobadocs-entry-point
-
-	A Boba<T> (pronounced "boba tea") represents a type that can validate
-	unknown values at runtime, and produce descriptive error messages when
-	validation fails.
-]=]
 export type Boba<T> = typeof(setmetatable({} :: BobaInner<T>, Boba))
 
---[=[
-	@function new
-
-
-]=]
-function Boba.new<T>(expected: string, match: (self: Boba<T>, x: unknown) -> boolean): Boba<T>
+function Boba.new<T>(expected: string, match: (self: Boba<T>, x: any) -> Result): Boba<T>
 	local self = setmetatable({
 		expected = expected,
-		error = `expected type {expected}`,
 		match = match,
 	}, Boba)
 	self.inner = self :: any
 	return self
 end
 
-function Boba.because(self: Boba<any>, reason: string)
-	return `{self.error}\n...because {reason}`
-end
-
 -- FIXME: Luau types are bad </3
 -- function boba.__call<T>(self: Type<T>, x: any)
-function Boba.__call(self: any, x: any): (boolean, string?)
+function Boba.__call(self: any, x: any): Result
 	return self:match(x)
 end
 
@@ -117,12 +132,16 @@ function Boba.__tostring(self: Boba<any>)
 end
 
 function Boba.cast<T>(self: Boba<T>, x: any): T?
-	return if self:match(x) then x else nil
+	return if self:match(x).ok then x else nil
 end
 
 function Boba.assert<T>(self: Boba<T>, x: any): T
-	local matchType, typeError = self:match(x)
-	return if matchType then x else error(typeError)
+	local result = self:match(x)
+	return if result.ok then x else error(result:format())
+end
+
+function Boba.fail(self: Boba<any>, message: string)
+	return Result.fail(self.expected, message)
 end
 
 function Boba.Nickname<T>(self: Boba<T>, name: string): Boba<T>
@@ -139,74 +158,72 @@ end
 
 function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
 	return Boba.new(`({left.expected}) & ({right.expected})`, function(self, x)
-		local isLeft, leftError = left:match(x)
-		if isLeft then
-			local isRight, rightError = right:match(x)
-			if isRight then
-				return true
-			end
-			return false, self:because(`it isn't the right type: {rightError}`)
+		local leftResult = left:match(x)
+		if leftResult.ok then
+			local rightResult = right:match(x)
+			return if rightResult.ok
+				then Result.ok
+				else self:fail("it didn't match the right type"):because(rightResult)
 		end
-		return false, self:because(`it isn't the left type: {leftError}`)
+		return self:fail("it didn't match the left type"):because(leftResult)
 	end)
 end
 
 function Boba.Or<L, R>(left: Boba<L>, right: Boba<R>): Boba<L | R>
 	return Boba.new(`{left.expected} | {right.expected}`, function(self, x)
-		local isLeft, leftError = left:match(x)
-		local isRight, rightError = right:match(x)
-		if isLeft or isRight then
-			return true
+		local leftResult = left:match(x)
+		local rightResult = right:match(x)
+		if leftResult.ok or rightResult.ok then
+			return Result.ok
 		end
-		return false, self:because(`is not the left type: {leftError}: or the right type: {rightError}`)
+		return self:fail(`did not match any of: {left.expected}, {right.expected}`)
+			:because(leftResult)
+			:because(rightResult)
 	end)
 end
 
 function Boba.Optional<T>(inner: Boba<T>): Boba<T?>
-	return Boba.new(`({inner.expected})?`, function(self, x: unknown): boolean
+	return Boba.new(`({inner.expected})?`, function(self, x)
 		if x == nil then
-			return true
+			return Result.ok
 		end
 		return inner:match(x)
 	end)
 end
 
 function Boba.Predicate<T>(inner: Boba<T>, predicate: (value: T) -> (boolean, string?)): Boba<T>
-	return Boba.new(`Predicate<{inner.expected}>`, function(self, x: any): boolean
-		local matches, matchError = inner:match(x)
+	return Boba.new(`Predicate<{inner.expected}>`, function(self, x)
+		local innerResult = inner:match(x)
 
-		if matches then
-			local passes, predicateError = predicate(x)
-			if passes then
-				return true
+		if innerResult.ok then
+			local predicateOk, predicateError = predicate(x)
+			if predicateOk then
+				return Result.ok
 			end
 
-			return false, self:because(predicateError or "value did not sastify the predicate")
+			return self:fail(predicateError or "value did not satisfy the predicate")
 		end
 
-		return false, matchError
+		return innerResult
 	end)
 end
 
 function Boba.Literal<T>(literal: T, nickname: string?): Boba<T>
 	return Boba.new(nickname or tostring(literal), function(self, x)
-		if rawequal(x, literal) then
-			return true
-		end
-		return false, self:because(`only {literal} is accepted, but got {x}`)
+		return if rawequal(x, literal) then Result.ok else self:fail(`only {literal} is accepted, but {quoteGot(x)}`)
 	end)
 end
 
 function Boba.Typeof<T>(expected: string)
-	return Boba.new(expected, function(self, x: unknown): boolean
-		return typeof(x) == expected, `{self.error}, but got {x} ({typeof(x)})`
+	return Boba.new(expected, function(self, x)
+		return if typeof(x) == expected then Result.ok else self:fail(quoteGot(x))
 	end)
 end
 
 function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
-	return Boba.new(`\{ {values.expected} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ {values.expected} \}`, function(self, x)
 		if typeof(x) ~= "table" then
-			return false, self:because(`expected a table, but got {typeof(x)}`)
+			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
 
 		local expected = #x
@@ -216,59 +233,59 @@ function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
 			encountered += 1
 
 			if encountered > expected or typeof(key) ~= "number" then
-				return false, self:because(`because there's non-numeric indexes, such as key {tostring(key)}`)
+				return self:fail(`because there's non-numeric indexes, such as key {quote(key)}`)
 			end
 
-			local isValue, valueError = values:match(value)
-			if not isValue then
-				return false, self:because(`at index #{key}: {valueError}`)
+			local valueResult = values:match(value)
+			if not valueResult.ok then
+				return self:fail(`value at index #{key} doesn't match`):because(valueResult)
 			end
 		end
 
-		return true
+		return Result.ok
 	end)
 end
 
 function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
-	return Boba.new(`\{ [{keys.expected}]: {values.expected} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ [{keys.expected}]: {values.expected} \}`, function(self, x)
 		if typeof(x) ~= "table" then
-			return false, self:because(`expected a table, but got {typeof(x)}`)
+			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
 
 		for key, value in pairs(x) do
-			local isKey, keyError = keys:match(key)
-			if not isKey then
-				return false, self:because(`got unexpected key {key}: {keyError}`)
+			local keyResult = keys:match(key)
+			if not keyResult.ok then
+				return self:fail(`quoteGot unexpected key {quote(key)}`):because(keyResult)
 			end
 
-			local isValue, valueError = values:match(value)
-			if not isValue then
-				return false, self:because(`at key {key}: {valueError}`)
+			local valueResult = values:match(value)
+			if not valueResult.ok then
+				return self:fail(`at key {quote(key)}`):because(valueResult)
 			end
 		end
 
-		return true
+		return Result.ok
 	end)
 end
 
 function Boba.Set<K>(keys: Boba<K>): Boba<{ [K]: true }>
-	return Boba.new(`\{ [{keys.expected}]: true \}`, function(self, x: any): boolean
+	return Boba.new(`\{ [{keys.expected}]: true \}`, function(self, x)
 		if typeof(x) ~= "table" then
-			return false, self:because(`expected a table, but got {typeof(x)}`)
+			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
 
 		for key, value in pairs(x) do
-			local isKey, keyError = keys:match(value)
-			if not isKey then
-				return false, self:because(`got unexpected key {key}: {keyError}`)
+			local keyResult = keys:match(key)
+			if not keyResult.ok then
+				return self:fail(`quoteGot unexpected key {quote(key)}`):because(keyResult)
 			end
 
 			if value ~= true then
-				return false, self:because(`expected literal \`true\`, but at key {key} got {value}`)
+				return self:fail(`expected literal \`true\`, but at key {quote(key)} quoteGot {quote(value)}`)
 			end
 		end
 
-		return true
+		return Result.ok
 	end)
 end
 
@@ -279,23 +296,20 @@ function Boba.Interface<T>(interface: T & { [string]: Boba<any> }): Boba<T>
 		table.insert(expectedPairs, `{key}: {value.expected}`)
 	end
 
-	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x)
 		if typeof(x) ~= "table" then
-			return false, self:because(`expected a table, but got {typeof(x)}`)
+			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
 
 		for key, valueType in pairs(interface) do
 			local value = x[key]
-			local isValue, valueError = valueType:match(value)
-			if not isValue then
-				return false,
-					self:because(
-						`value at key {tostring(key)}: {string.gsub(valueError or valueType.error, "\n", "\n...")}`
-					)
+			local valueResult = valueType:match(value)
+			if not valueResult.ok then
+				return self:fail(`value at key {quote(key)}`):because(valueResult)
 			end
 		end
 
-		return true
+		return Result.ok
 	end)
 end
 
@@ -306,42 +320,39 @@ function Boba.ExhaustiveInterface<T>(interface: T): Boba<T>
 		table.insert(expectedPairs, `{key}: {value.expected}`)
 	end
 
-	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x: any): boolean
+	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x)
 		if typeof(x) ~= "table" then
-			return false, self:because(`expected a table, but got {typeof(x)}`)
+			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
 
-		for key, valueType in pairs(interface :: any) do
+		for key, valueType: Boba<any> in pairs(interface :: any) do
 			local value = x[key]
-			local isValue, valueError = valueType:match(value)
-			if not isValue then
-				return false,
-					self:because(
-						`value at key {tostring(key)}: {string.gsub(valueError or valueType.error, "\n", "\n...")}`
-					)
+			local valueResult = valueType:match(value)
+			if not valueResult.ok then
+				return self:fail(`value at key {quote(key)}`):because(valueResult)
 			end
 		end
 
 		for key in pairs(x) do
 			if (interface :: any)[key] == nil then
-				return false, self:because(`{tostring(key)} isn't included in exhaustive interface`)
+				return self:fail(`{quote(key)} isn't included in exhaustive interface`)
 			end
 		end
 
-		return true
+		return Result.ok
 	end)
 end
 
 Boba.Any = Boba.new("any", function()
-	return true
+	return Result.ok
 end) :: Boba<any>
 
 Boba.Unknown = Boba.new("unknown", function()
-	return true
+	return Result.ok
 end) :: Boba<unknown>
 
 Boba.Never = Boba.new("never", function(self)
-	return false, self.error
+	return self:fail("there are no valid values")
 end) :: Boba<never>
 
 Boba.Boolean = Boba.Typeof("boolean") :: Boba<boolean>
