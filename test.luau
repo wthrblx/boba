@@ -12,4 +12,4 @@ local untrustedData = {
 	amount = "Deadly",
 }
 
-print(Turret:check(untrustedData))
+print(Turret:match(untrustedData))

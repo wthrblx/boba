@@ -29,21 +29,848 @@ local Boba = require("./boba")
 
 export type Boba<T> = Boba.Boba<T>
 
-local function isA(className: string)
-	return Boba.new(className, function(self, x)
-		if typeof(x) == "Instance" then
-			if x:IsA(className) then
-				return true
-			else
-				return false, self:because(`expected Instance is a {className}, but got {x.ClassName}`)
-			end
-		end
-		return false, self:because(`expected an Instance, but got {typeof(x)}`)
-	end)
-end
-
 local ext = {}
+ext.IsA = {} :: Instances
+ext.IsClass = {} :: Instances
 
+-- casting to any to disable luau-lsp metatable magic function, which breaks
+-- autocomplete
+setmetatable(ext.IsA :: any, table.freeze({
+	__index = function(self: Instances, className: string)
+		local instanceBoba = Boba.new(className, function(self, x)
+			if typeof(x) == "Instance" then
+				if x:IsA(className) then
+					return true
+				end
+				return false, self:because(`expected instance inherits {className}, but got {x:GetFullName()} ({x.ClassName})`)
+			end
+			return false, self:because(`expected an Instance, but got {x} ({typeof(x)}}`)
+		end)
+
+		self[className] = instanceBoba
+		return instanceBoba
+	end
+}))
+
+setmetatable(ext.IsClass :: any, table.freeze({
+	__index = function(self: Instances, className: string)
+		local instanceBoba = Boba.new(className, function(self, x)
+			if typeof(x) == "Instance" then
+				if x.ClassName == className then
+					return true
+				end
+				return false, self:because(`expected {className}, but got {x:GetFullName()} ({x.ClassName})`)
+			end
+			return false, self:because(`expected an Instance, but got {x} ({typeof(x)}}`)
+		end)
+
+		self[className] = instanceBoba
+		return instanceBoba
+	end
+}))
+
+-- boba: start roblox instances typegen
+type Instances = {
+	Accessory: Boba<Accessory>,
+	AccessoryDescription: Boba<AccessoryDescription>,
+	AccountService: Boba<AccountService>,
+	Accoutrement: Boba<Accoutrement>,
+	AchievementService: Boba<AchievementService>,
+	ActivityHistoryEventService: Boba<ActivityHistoryEventService>,
+	Actor: Boba<Actor>,
+	AdGui: Boba<AdGui>,
+	AdPortal: Boba<AdPortal>,
+	AdService: Boba<AdService>,
+	AdvancedDragger: Boba<AdvancedDragger>,
+	AirController: Boba<AirController>,
+	AlignOrientation: Boba<AlignOrientation>,
+	AlignPosition: Boba<AlignPosition>,
+	AnalyticsService: Boba<AnalyticsService>,
+	AngularVelocity: Boba<AngularVelocity>,
+	Animation: Boba<Animation>,
+	AnimationClip: Boba<AnimationClip>,
+	AnimationClipProvider: Boba<AnimationClipProvider>,
+	AnimationController: Boba<AnimationController>,
+	AnimationFromVideoCreatorService: Boba<AnimationFromVideoCreatorService>,
+	AnimationFromVideoCreatorStudioService: Boba<AnimationFromVideoCreatorStudioService>,
+	AnimationImportData: Boba<AnimationImportData>,
+	AnimationRigData: Boba<AnimationRigData>,
+	AnimationStreamTrack: Boba<AnimationStreamTrack>,
+	AnimationTrack: Boba<AnimationTrack>,
+	Animator: Boba<Animator>,
+	Annotation: Boba<Annotation>,
+	AnnotationsService: Boba<AnnotationsService>,
+	AppLifecycleObserverService: Boba<AppLifecycleObserverService>,
+	AppRatingPromptService: Boba<AppRatingPromptService>,
+	AppStorageService: Boba<AppStorageService>,
+	AppUpdateService: Boba<AppUpdateService>,
+	ArcHandles: Boba<ArcHandles>,
+	AssetCounterService: Boba<AssetCounterService>,
+	AssetDeliveryProxy: Boba<AssetDeliveryProxy>,
+	AssetImportService: Boba<AssetImportService>,
+	AssetImportSession: Boba<AssetImportSession>,
+	AssetManagerService: Boba<AssetManagerService>,
+	AssetPatchSettings: Boba<AssetPatchSettings>,
+	AssetService: Boba<AssetService>,
+	AssetSoundEffect: Boba<AssetSoundEffect>,
+	Atmosphere: Boba<Atmosphere>,
+	AtmosphereSensor: Boba<AtmosphereSensor>,
+	Attachment: Boba<Attachment>,
+	AudioAnalyzer: Boba<AudioAnalyzer>,
+	AudioChannelMixer: Boba<AudioChannelMixer>,
+	AudioChannelSplitter: Boba<AudioChannelSplitter>,
+	AudioChorus: Boba<AudioChorus>,
+	AudioCompressor: Boba<AudioCompressor>,
+	AudioDeviceInput: Boba<AudioDeviceInput>,
+	AudioDeviceOutput: Boba<AudioDeviceOutput>,
+	AudioDistortion: Boba<AudioDistortion>,
+	AudioEcho: Boba<AudioEcho>,
+	AudioEmitter: Boba<AudioEmitter>,
+	AudioEqualizer: Boba<AudioEqualizer>,
+	AudioFader: Boba<AudioFader>,
+	AudioFilter: Boba<AudioFilter>,
+	AudioFlanger: Boba<AudioFlanger>,
+	AudioFocusService: Boba<AudioFocusService>,
+	AudioGate: Boba<AudioGate>,
+	AudioLimiter: Boba<AudioLimiter>,
+	AudioListener: Boba<AudioListener>,
+	AudioPages: Boba<AudioPages>,
+	AudioPitchShifter: Boba<AudioPitchShifter>,
+	AudioPlayer: Boba<AudioPlayer>,
+	AudioReverb: Boba<AudioReverb>,
+	AudioSearchParams: Boba<AudioSearchParams>,
+	AudioTextToSpeech: Boba<AudioTextToSpeech>,
+	AudioTremolo: Boba<AudioTremolo>,
+	AuroraScriptObject: Boba<AuroraScriptObject>,
+	AvatarAccessoryRules: Boba<AvatarAccessoryRules>,
+	AvatarAnimationRules: Boba<AvatarAnimationRules>,
+	AvatarBodyRules: Boba<AvatarBodyRules>,
+	AvatarChatService: Boba<AvatarChatService>,
+	AvatarClothingRules: Boba<AvatarClothingRules>,
+	AvatarCollisionRules: Boba<AvatarCollisionRules>,
+	AvatarCreationService: Boba<AvatarCreationService>,
+	AvatarEditorService: Boba<AvatarEditorService>,
+	AvatarImportService: Boba<AvatarImportService>,
+	AvatarRules: Boba<AvatarRules>,
+	AvatarSettings: Boba<AvatarSettings>,
+	Backpack: Boba<Backpack>,
+	BackpackItem: Boba<BackpackItem>,
+	BadgeService: Boba<BadgeService>,
+	BallSocketConstraint: Boba<BallSocketConstraint>,
+	BanHistoryPages: Boba<BanHistoryPages>,
+	BaseImportData: Boba<BaseImportData>,
+	BasePlayerGui: Boba<BasePlayerGui>,
+	BaseRemoteEvent: Boba<BaseRemoteEvent>,
+	BaseScript: Boba<BaseScript>,
+	BaseWrap: Boba<BaseWrap>,
+	Beam: Boba<Beam>,
+	BillboardGui: Boba<BillboardGui>,
+	BinaryStringValue: Boba<BinaryStringValue>,
+	BindableEvent: Boba<BindableEvent>,
+	BindableFunction: Boba<BindableFunction>,
+	BlockMesh: Boba<BlockMesh>,
+	BloomEffect: Boba<BloomEffect>,
+	BlurEffect: Boba<BlurEffect>,
+	BodyAngularVelocity: Boba<BodyAngularVelocity>,
+	BodyColors: Boba<BodyColors>,
+	BodyForce: Boba<BodyForce>,
+	BodyGyro: Boba<BodyGyro>,
+	BodyMover: Boba<BodyMover>,
+	BodyPartDescription: Boba<BodyPartDescription>,
+	BodyPosition: Boba<BodyPosition>,
+	BodyThrust: Boba<BodyThrust>,
+	BodyVelocity: Boba<BodyVelocity>,
+	Bone: Boba<Bone>,
+	BoolValue: Boba<BoolValue>,
+	BoxHandleAdornment: Boba<BoxHandleAdornment>,
+	Breakpoint: Boba<Breakpoint>,
+	BrickColorValue: Boba<BrickColorValue>,
+	BrowserService: Boba<BrowserService>,
+	BubbleChatConfiguration: Boba<BubbleChatConfiguration>,
+	BubbleChatMessageProperties: Boba<BubbleChatMessageProperties>,
+	BugReporterService: Boba<BugReporterService>,
+	BulkImportService: Boba<BulkImportService>,
+	BuoyancySensor: Boba<BuoyancySensor>,
+	CFrameValue: Boba<CFrameValue>,
+	CSGDictionaryService: Boba<CSGDictionaryService>,
+	CacheableContentProvider: Boba<CacheableContentProvider>,
+	CalloutService: Boba<CalloutService>,
+	Camera: Boba<Camera>,
+	CanvasGroup: Boba<CanvasGroup>,
+	Capture: Boba<Capture>,
+	CaptureService: Boba<CaptureService>,
+	CapturesPages: Boba<CapturesPages>,
+	CatalogPages: Boba<CatalogPages>,
+	ChangeHistoryService: Boba<ChangeHistoryService>,
+	ChangeHistoryStreamingService: Boba<ChangeHistoryStreamingService>,
+	ChannelTabsConfiguration: Boba<ChannelTabsConfiguration>,
+	CharacterAppearance: Boba<CharacterAppearance>,
+	CharacterMesh: Boba<CharacterMesh>,
+	Chat: Boba<Chat>,
+	ChatInputBarConfiguration: Boba<ChatInputBarConfiguration>,
+	ChatWindowConfiguration: Boba<ChatWindowConfiguration>,
+	ChatWindowMessageProperties: Boba<ChatWindowMessageProperties>,
+	ChatbotUIService: Boba<ChatbotUIService>,
+	ChorusSoundEffect: Boba<ChorusSoundEffect>,
+	ClickDetector: Boba<ClickDetector>,
+	ClientReplicator: Boba<ClientReplicator>,
+	ClimbController: Boba<ClimbController>,
+	Clothing: Boba<Clothing>,
+	CloudCRUDService: Boba<CloudCRUDService>,
+	CloudLocalizationTable: Boba<CloudLocalizationTable>,
+	Clouds: Boba<Clouds>,
+	ClusterPacketCache: Boba<ClusterPacketCache>,
+	Collaborator: Boba<Collaborator>,
+	CollaboratorsService: Boba<CollaboratorsService>,
+	CollectionService: Boba<CollectionService>,
+	Color3Value: Boba<Color3Value>,
+	ColorCorrectionEffect: Boba<ColorCorrectionEffect>,
+	ColorGradingEffect: Boba<ColorGradingEffect>,
+	CommerceService: Boba<CommerceService>,
+	CompressorSoundEffect: Boba<CompressorSoundEffect>,
+	ConeHandleAdornment: Boba<ConeHandleAdornment>,
+	ConfigService: Boba<ConfigService>,
+	ConfigSnapshot: Boba<ConfigSnapshot>,
+	Configuration: Boba<Configuration>,
+	ConfigureServerService: Boba<ConfigureServerService>,
+	ConnectivityService: Boba<ConnectivityService>,
+	Constraint: Boba<Constraint>,
+	ContentProvider: Boba<ContentProvider>,
+	ContextActionService: Boba<ContextActionService>,
+	Controller: Boba<Controller>,
+	ControllerBase: Boba<ControllerBase>,
+	ControllerManager: Boba<ControllerManager>,
+	ControllerPartSensor: Boba<ControllerPartSensor>,
+	ControllerSensor: Boba<ControllerSensor>,
+	ControllerService: Boba<ControllerService>,
+	ConversationalAIAcceptanceService: Boba<ConversationalAIAcceptanceService>,
+	CookiesService: Boba<CookiesService>,
+	CoreGui: Boba<CoreGui>,
+	CorePackages: Boba<CorePackages>,
+	CoreScript: Boba<CoreScript>,
+	CoreScriptDebuggingManagerHelper: Boba<CoreScriptDebuggingManagerHelper>,
+	CoreScriptSyncService: Boba<CoreScriptSyncService>,
+	CornerWedgePart: Boba<CornerWedgePart>,
+	CreationDBService: Boba<CreationDBService>,
+	CreatorStoreService: Boba<CreatorStoreService>,
+	CrossDMScriptChangeListener: Boba<CrossDMScriptChangeListener>,
+	CurveAnimation: Boba<CurveAnimation>,
+	CustomEvent: Boba<CustomEvent>,
+	CustomEventReceiver: Boba<CustomEventReceiver>,
+	CustomLog: Boba<CustomLog>,
+	CustomSoundEffect: Boba<CustomSoundEffect>,
+	CylinderHandleAdornment: Boba<CylinderHandleAdornment>,
+	CylinderMesh: Boba<CylinderMesh>,
+	CylindricalConstraint: Boba<CylindricalConstraint>,
+	DataModel: Boba<DataModel>,
+	DataModelPatchService: Boba<DataModelPatchService>,
+	DataModelSession: Boba<DataModelSession>,
+	DataStore: Boba<DataStore>,
+	DataStoreGetOptions: Boba<DataStoreGetOptions>,
+	DataStoreIncrementOptions: Boba<DataStoreIncrementOptions>,
+	DataStoreInfo: Boba<DataStoreInfo>,
+	DataStoreKey: Boba<DataStoreKey>,
+	DataStoreKeyInfo: Boba<DataStoreKeyInfo>,
+	DataStoreKeyPages: Boba<DataStoreKeyPages>,
+	DataStoreListingPages: Boba<DataStoreListingPages>,
+	DataStoreObjectVersionInfo: Boba<DataStoreObjectVersionInfo>,
+	DataStoreOptions: Boba<DataStoreOptions>,
+	DataStorePages: Boba<DataStorePages>,
+	DataStoreService: Boba<DataStoreService>,
+	DataStoreSetOptions: Boba<DataStoreSetOptions>,
+	DataStoreVersionPages: Boba<DataStoreVersionPages>,
+	Debris: Boba<Debris>,
+	DebuggablePluginWatcher: Boba<DebuggablePluginWatcher>,
+	DebuggerBreakpoint: Boba<DebuggerBreakpoint>,
+	DebuggerConnection: Boba<DebuggerConnection>,
+	DebuggerConnectionManager: Boba<DebuggerConnectionManager>,
+	DebuggerLuaResponse: Boba<DebuggerLuaResponse>,
+	DebuggerManager: Boba<DebuggerManager>,
+	DebuggerUIService: Boba<DebuggerUIService>,
+	DebuggerVariable: Boba<DebuggerVariable>,
+	DebuggerWatch: Boba<DebuggerWatch>,
+	Decal: Boba<Decal>,
+	DepthOfFieldEffect: Boba<DepthOfFieldEffect>,
+	DeviceIdService: Boba<DeviceIdService>,
+	Dialog: Boba<Dialog>,
+	DialogChoice: Boba<DialogChoice>,
+	DistortionSoundEffect: Boba<DistortionSoundEffect>,
+	DockWidgetPluginGui: Boba<DockWidgetPluginGui>,
+	DoubleConstrainedValue: Boba<DoubleConstrainedValue>,
+	DraftsService: Boba<DraftsService>,
+	DragDetector: Boba<DragDetector>,
+	Dragger: Boba<Dragger>,
+	DraggerService: Boba<DraggerService>,
+	DynamicRotate: Boba<DynamicRotate>,
+	EchoSoundEffect: Boba<EchoSoundEffect>,
+	EditableImage: Boba<EditableImage>,
+	EditableMesh: Boba<EditableMesh>,
+	EditableService: Boba<EditableService>,
+	EmotesPages: Boba<EmotesPages>,
+	EqualizerSoundEffect: Boba<EqualizerSoundEffect>,
+	EulerRotationCurve: Boba<EulerRotationCurve>,
+	EventIngestService: Boba<EventIngestService>,
+	ExampleV2Service: Boba<ExampleV2Service>,
+	ExecutedRemoteCommand: Boba<ExecutedRemoteCommand>,
+	ExperienceAuthService: Boba<ExperienceAuthService>,
+	ExperienceInviteOptions: Boba<ExperienceInviteOptions>,
+	ExperienceNotificationService: Boba<ExperienceNotificationService>,
+	ExperienceService: Boba<ExperienceService>,
+	ExperienceStateCaptureService: Boba<ExperienceStateCaptureService>,
+	ExperienceStateRecordingService: Boba<ExperienceStateRecordingService>,
+	ExplorerFilter: Boba<ExplorerFilter>,
+	ExplorerFilterAutocompleter: Boba<ExplorerFilterAutocompleter>,
+	ExplorerServiceVisibilityService: Boba<ExplorerServiceVisibilityService>,
+	Explosion: Boba<Explosion>,
+	FaceAnimatorService: Boba<FaceAnimatorService>,
+	FaceControls: Boba<FaceControls>,
+	FacialAgeEstimationService: Boba<FacialAgeEstimationService>,
+	FacialAnimationRecordingService: Boba<FacialAnimationRecordingService>,
+	FacialAnimationStreamingServiceStats: Boba<FacialAnimationStreamingServiceStats>,
+	FacialAnimationStreamingServiceV2: Boba<FacialAnimationStreamingServiceV2>,
+	FacialAnimationStreamingSubsessionStats: Boba<FacialAnimationStreamingSubsessionStats>,
+	FacsImportData: Boba<FacsImportData>,
+	Feature: Boba<Feature>,
+	FeatureRestrictionManager: Boba<FeatureRestrictionManager>,
+	File: Boba<File>,
+	FileMesh: Boba<FileMesh>,
+	Fire: Boba<Fire>,
+	Flag: Boba<Flag>,
+	FlagStand: Boba<FlagStand>,
+	FlagStandService: Boba<FlagStandService>,
+	FlangeSoundEffect: Boba<FlangeSoundEffect>,
+	FloatCurve: Boba<FloatCurve>,
+	FloorWire: Boba<FloorWire>,
+	FluidForceSensor: Boba<FluidForceSensor>,
+	FlyweightService: Boba<FlyweightService>,
+	Folder: Boba<Folder>,
+	ForceField: Boba<ForceField>,
+	FormFactorPart: Boba<FormFactorPart>,
+	Frame: Boba<Frame>,
+	FriendPages: Boba<FriendPages>,
+	FriendService: Boba<FriendService>,
+	FunctionalTest: Boba<FunctionalTest>,
+	GamePassService: Boba<GamePassService>,
+	GamepadService: Boba<GamepadService>,
+	GenerationService: Boba<GenerationService>,
+	GenericChallengeService: Boba<GenericChallengeService>,
+	GenericSettings: Boba<GenericSettings>,
+	Geometry: Boba<Geometry>,
+	GeometryService: Boba<GeometryService>,
+	GetTextBoundsParams: Boba<GetTextBoundsParams>,
+	GlobalDataStore: Boba<GlobalDataStore>,
+	Glue: Boba<Glue>,
+	GroundController: Boba<GroundController>,
+	GroupImportData: Boba<GroupImportData>,
+	GroupService: Boba<GroupService>,
+	GuiBase: Boba<GuiBase>,
+	GuiBase3d: Boba<GuiBase3d>,
+	GuiLabel: Boba<GuiLabel>,
+	GuiMain: Boba<GuiMain>,
+	GuiService: Boba<GuiService>,
+	GuidRegistryService: Boba<GuidRegistryService>,
+	HSRDataContentProvider: Boba<HSRDataContentProvider>,
+	HandleAdornment: Boba<HandleAdornment>,
+	Handles: Boba<Handles>,
+	HandlesBase: Boba<HandlesBase>,
+	HapticEffect: Boba<HapticEffect>,
+	HapticService: Boba<HapticService>,
+	HarmonyService: Boba<HarmonyService>,
+	Hat: Boba<Hat>,
+	HeapProfilerService: Boba<HeapProfilerService>,
+	HeatmapService: Boba<HeatmapService>,
+	HeightmapImporterService: Boba<HeightmapImporterService>,
+	HiddenSurfaceRemovalAsset: Boba<HiddenSurfaceRemovalAsset>,
+	Highlight: Boba<Highlight>,
+	HingeConstraint: Boba<HingeConstraint>,
+	Hint: Boba<Hint>,
+	Hole: Boba<Hole>,
+	Hopper: Boba<Hopper>,
+	HopperBin: Boba<HopperBin>,
+	HttpRbxApiService: Boba<HttpRbxApiService>,
+	HttpRequest: Boba<HttpRequest>,
+	HttpService: Boba<HttpService>,
+	Humanoid: Boba<Humanoid>,
+	HumanoidController: Boba<HumanoidController>,
+	HumanoidDescription: Boba<HumanoidDescription>,
+	IKControl: Boba<IKControl>,
+	ILegacyStudioBridge: Boba<ILegacyStudioBridge>,
+	IXPService: Boba<IXPService>,
+	ImageButton: Boba<ImageButton>,
+	ImageHandleAdornment: Boba<ImageHandleAdornment>,
+	ImageLabel: Boba<ImageLabel>,
+	ImportSession: Boba<ImportSession>,
+	IncrementalPatchBuilder: Boba<IncrementalPatchBuilder>,
+	InputAction: Boba<InputAction>,
+	InputBinding: Boba<InputBinding>,
+	InputContext: Boba<InputContext>,
+	InputObject: Boba<InputObject>,
+	InsertService: Boba<InsertService>,
+	InstanceAdornment: Boba<InstanceAdornment>,
+	InstanceExtensionsService: Boba<InstanceExtensionsService>,
+	IntConstrainedValue: Boba<IntConstrainedValue>,
+	IntValue: Boba<IntValue>,
+	IntersectOperation: Boba<IntersectOperation>,
+	InventoryPages: Boba<InventoryPages>,
+	JointImportData: Boba<JointImportData>,
+	JointInstance: Boba<JointInstance>,
+	JointsService: Boba<JointsService>,
+	KeyboardService: Boba<KeyboardService>,
+	Keyframe: Boba<Keyframe>,
+	KeyframeMarker: Boba<KeyframeMarker>,
+	KeyframeSequence: Boba<KeyframeSequence>,
+	KeyframeSequenceProvider: Boba<KeyframeSequenceProvider>,
+	LSPFileSyncService: Boba<LSPFileSyncService>,
+	LanguageService: Boba<LanguageService>,
+	LegacyStudioBridge: Boba<LegacyStudioBridge>,
+	Light: Boba<Light>,
+	Lighting: Boba<Lighting>,
+	LineForce: Boba<LineForce>,
+	LineHandleAdornment: Boba<LineHandleAdornment>,
+	LinearVelocity: Boba<LinearVelocity>,
+	LinkingService: Boba<LinkingService>,
+	LiveScriptingService: Boba<LiveScriptingService>,
+	LiveSyncService: Boba<LiveSyncService>,
+	LocalDebuggerConnection: Boba<LocalDebuggerConnection>,
+	LocalScript: Boba<LocalScript>,
+	LocalStorageService: Boba<LocalStorageService>,
+	LocalizationService: Boba<LocalizationService>,
+	LocalizationTable: Boba<LocalizationTable>,
+	LodDataEntity: Boba<LodDataEntity>,
+	LodDataService: Boba<LodDataService>,
+	LogReporterService: Boba<LogReporterService>,
+	LogService: Boba<LogService>,
+	LoginService: Boba<LoginService>,
+	LuaSettings: Boba<LuaSettings>,
+	LuaWebService: Boba<LuaWebService>,
+	LuauScriptAnalyzerService: Boba<LuauScriptAnalyzerService>,
+	MLModelDeliveryService: Boba<MLModelDeliveryService>,
+	MLService: Boba<MLService>,
+	MLSession: Boba<MLSession>,
+	ManualGlue: Boba<ManualGlue>,
+	ManualSurfaceJointInstance: Boba<ManualSurfaceJointInstance>,
+	ManualWeld: Boba<ManualWeld>,
+	MarkerCurve: Boba<MarkerCurve>,
+	MarketplaceService: Boba<MarketplaceService>,
+	MatchmakingService: Boba<MatchmakingService>,
+	MaterialGenerationService: Boba<MaterialGenerationService>,
+	MaterialImportData: Boba<MaterialImportData>,
+	MaterialService: Boba<MaterialService>,
+	MaterialVariant: Boba<MaterialVariant>,
+	MemStorageConnection: Boba<MemStorageConnection>,
+	MemStorageService: Boba<MemStorageService>,
+	MemoryStoreHashMap: Boba<MemoryStoreHashMap>,
+	MemoryStoreHashMapPages: Boba<MemoryStoreHashMapPages>,
+	MemoryStoreQueue: Boba<MemoryStoreQueue>,
+	MemoryStoreService: Boba<MemoryStoreService>,
+	MemoryStoreSortedMap: Boba<MemoryStoreSortedMap>,
+	MeshContentProvider: Boba<MeshContentProvider>,
+	MeshImportData: Boba<MeshImportData>,
+	MeshPart: Boba<MeshPart>,
+	Message: Boba<Message>,
+	MessageBusConnection: Boba<MessageBusConnection>,
+	MessageBusService: Boba<MessageBusService>,
+	MessagingService: Boba<MessagingService>,
+	MetaBreakpoint: Boba<MetaBreakpoint>,
+	MetaBreakpointContext: Boba<MetaBreakpointContext>,
+	MetaBreakpointManager: Boba<MetaBreakpointManager>,
+	MicroProfilerService: Boba<MicroProfilerService>,
+	Model: Boba<Model>,
+	ModerationService: Boba<ModerationService>,
+	ModuleScript: Boba<ModuleScript>,
+	Motor: Boba<Motor>,
+	Motor6D: Boba<Motor6D>,
+	MotorFeature: Boba<MotorFeature>,
+	Mouse: Boba<Mouse>,
+	MouseService: Boba<MouseService>,
+	MultipleDocumentInterfaceInstance: Boba<MultipleDocumentInterfaceInstance>,
+	NegateOperation: Boba<NegateOperation>,
+	NetworkClient: Boba<NetworkClient>,
+	NetworkReplicator: Boba<NetworkReplicator>,
+	NetworkServer: Boba<NetworkServer>,
+	NoCollisionConstraint: Boba<NoCollisionConstraint>,
+	Noise: Boba<Noise>,
+	NonReplicatedCSGDictionaryService: Boba<NonReplicatedCSGDictionaryService>,
+	NotificationService: Boba<NotificationService>,
+	NumberPose: Boba<NumberPose>,
+	NumberValue: Boba<NumberValue>,
+	Object: Boba<Object>,
+	ObjectValue: Boba<ObjectValue>,
+	OmniRecommendationsService: Boba<OmniRecommendationsService>,
+	OpenCloudApiV1: Boba<OpenCloudApiV1>,
+	OpenCloudService: Boba<OpenCloudService>,
+	OperationGraph: Boba<OperationGraph>,
+	OrderedDataStore: Boba<OrderedDataStore>,
+	OutfitPages: Boba<OutfitPages>,
+	PVAdornment: Boba<PVAdornment>,
+	PackageService: Boba<PackageService>,
+	PackageUIService: Boba<PackageUIService>,
+	Pages: Boba<Pages>,
+	Pants: Boba<Pants>,
+	ParabolaAdornment: Boba<ParabolaAdornment>,
+	Part: Boba<Part>,
+	PartAdornment: Boba<PartAdornment>,
+	PartOperation: Boba<PartOperation>,
+	PartOperationAsset: Boba<PartOperationAsset>,
+	ParticleEmitter: Boba<ParticleEmitter>,
+	PartyEmulatorService: Boba<PartyEmulatorService>,
+	PatchBundlerFileWatch: Boba<PatchBundlerFileWatch>,
+	PatchMapping: Boba<PatchMapping>,
+	Path: Boba<Path>,
+	Path2D: Boba<Path2D>,
+	PathfindingLink: Boba<PathfindingLink>,
+	PathfindingModifier: Boba<PathfindingModifier>,
+	PathfindingService: Boba<PathfindingService>,
+	PausedState: Boba<PausedState>,
+	PausedStateBreakpoint: Boba<PausedStateBreakpoint>,
+	PausedStateException: Boba<PausedStateException>,
+	PerformanceControlService: Boba<PerformanceControlService>,
+	PermissionsService: Boba<PermissionsService>,
+	PhysicsService: Boba<PhysicsService>,
+	PhysicsSettings: Boba<PhysicsSettings>,
+	PitchShiftSoundEffect: Boba<PitchShiftSoundEffect>,
+	PlaceAssetIdsService: Boba<PlaceAssetIdsService>,
+	PlaceStatsService: Boba<PlaceStatsService>,
+	PlacesService: Boba<PlacesService>,
+	Plane: Boba<Plane>,
+	PlaneConstraint: Boba<PlaneConstraint>,
+	Platform: Boba<Platform>,
+	PlatformCloudStorageService: Boba<PlatformCloudStorageService>,
+	PlatformFriendsService: Boba<PlatformFriendsService>,
+	Player: Boba<Player>,
+	PlayerData: Boba<PlayerData>,
+	PlayerDataRecord: Boba<PlayerDataRecord>,
+	PlayerDataRecordConfig: Boba<PlayerDataRecordConfig>,
+	PlayerDataService: Boba<PlayerDataService>,
+	PlayerEmulatorService: Boba<PlayerEmulatorService>,
+	PlayerGui: Boba<PlayerGui>,
+	PlayerHydrationService: Boba<PlayerHydrationService>,
+	PlayerMouse: Boba<PlayerMouse>,
+	PlayerScripts: Boba<PlayerScripts>,
+	PlayerViewService: Boba<PlayerViewService>,
+	Players: Boba<Players>,
+	Plugin: Boba<Plugin>,
+	PluginAction: Boba<PluginAction>,
+	PluginCapabilities: Boba<PluginCapabilities>,
+	PluginDebugService: Boba<PluginDebugService>,
+	PluginDragEvent: Boba<PluginDragEvent>,
+	PluginGui: Boba<PluginGui>,
+	PluginGuiService: Boba<PluginGuiService>,
+	PluginManagementService: Boba<PluginManagementService>,
+	PluginManager: Boba<PluginManager>,
+	PluginManagerInterface: Boba<PluginManagerInterface>,
+	PluginMenu: Boba<PluginMenu>,
+	PluginMouse: Boba<PluginMouse>,
+	PluginPolicyService: Boba<PluginPolicyService>,
+	PluginToolbar: Boba<PluginToolbar>,
+	PluginToolbarButton: Boba<PluginToolbarButton>,
+	PointLight: Boba<PointLight>,
+	PointsService: Boba<PointsService>,
+	PolicyService: Boba<PolicyService>,
+	Pose: Boba<Pose>,
+	PoseBase: Boba<PoseBase>,
+	PostEffect: Boba<PostEffect>,
+	PrismaticConstraint: Boba<PrismaticConstraint>,
+	ProcessInstancePhysicsService: Boba<ProcessInstancePhysicsService>,
+	ProximityPrompt: Boba<ProximityPrompt>,
+	PublishService: Boba<PublishService>,
+	QWidgetPluginGui: Boba<QWidgetPluginGui>,
+	RTAnimationTracker: Boba<RTAnimationTracker>,
+	RayValue: Boba<RayValue>,
+	RbxAnalyticsService: Boba<RbxAnalyticsService>,
+	RecommendationPages: Boba<RecommendationPages>,
+	RecommendationService: Boba<RecommendationService>,
+	ReflectionMetadata: Boba<ReflectionMetadata>,
+	ReflectionMetadataCallbacks: Boba<ReflectionMetadataCallbacks>,
+	ReflectionMetadataClass: Boba<ReflectionMetadataClass>,
+	ReflectionMetadataClasses: Boba<ReflectionMetadataClasses>,
+	ReflectionMetadataEnum: Boba<ReflectionMetadataEnum>,
+	ReflectionMetadataEnumItem: Boba<ReflectionMetadataEnumItem>,
+	ReflectionMetadataEnums: Boba<ReflectionMetadataEnums>,
+	ReflectionMetadataEvents: Boba<ReflectionMetadataEvents>,
+	ReflectionMetadataFunctions: Boba<ReflectionMetadataFunctions>,
+	ReflectionMetadataItem: Boba<ReflectionMetadataItem>,
+	ReflectionMetadataMember: Boba<ReflectionMetadataMember>,
+	ReflectionMetadataProperties: Boba<ReflectionMetadataProperties>,
+	ReflectionMetadataYieldFunctions: Boba<ReflectionMetadataYieldFunctions>,
+	ReflectionService: Boba<ReflectionService>,
+	RelativeGui: Boba<RelativeGui>,
+	RemoteCommandService: Boba<RemoteCommandService>,
+	RemoteCursorService: Boba<RemoteCursorService>,
+	RemoteDebuggerServer: Boba<RemoteDebuggerServer>,
+	RemoteEvent: Boba<RemoteEvent>,
+	RemoteFunction: Boba<RemoteFunction>,
+	RenderingTest: Boba<RenderingTest>,
+	ReplicatedFirst: Boba<ReplicatedFirst>,
+	ReplicatedStorage: Boba<ReplicatedStorage>,
+	ReverbSoundEffect: Boba<ReverbSoundEffect>,
+	RibbonNotificationService: Boba<RibbonNotificationService>,
+	RigidConstraint: Boba<RigidConstraint>,
+	RobloxPluginGuiService: Boba<RobloxPluginGuiService>,
+	RobloxSerializableInstance: Boba<RobloxSerializableInstance>,
+	RobloxServerStorage: Boba<RobloxServerStorage>,
+	RocketPropulsion: Boba<RocketPropulsion>,
+	RodConstraint: Boba<RodConstraint>,
+	RomarkRbxAnalyticsService: Boba<RomarkRbxAnalyticsService>,
+	RomarkService: Boba<RomarkService>,
+	RootImportData: Boba<RootImportData>,
+	RopeConstraint: Boba<RopeConstraint>,
+	Rotate: Boba<Rotate>,
+	RotateP: Boba<RotateP>,
+	RotateV: Boba<RotateV>,
+	RotationCurve: Boba<RotationCurve>,
+	RtMessagingService: Boba<RtMessagingService>,
+	RunService: Boba<RunService>,
+	RunningAverageItemDouble: Boba<RunningAverageItemDouble>,
+	RunningAverageItemInt: Boba<RunningAverageItemInt>,
+	RunningAverageTimeIntervalItem: Boba<RunningAverageTimeIntervalItem>,
+	RuntimeContentService: Boba<RuntimeContentService>,
+	RuntimeScriptService: Boba<RuntimeScriptService>,
+	SafetyService: Boba<SafetyService>,
+	ScreenGui: Boba<ScreenGui>,
+	ScreenshotCapture: Boba<ScreenshotCapture>,
+	ScreenshotHud: Boba<ScreenshotHud>,
+	Script: Boba<Script>,
+	ScriptBuilder: Boba<ScriptBuilder>,
+	ScriptChangeService: Boba<ScriptChangeService>,
+	ScriptCloneWatcher: Boba<ScriptCloneWatcher>,
+	ScriptCloneWatcherHelper: Boba<ScriptCloneWatcherHelper>,
+	ScriptCommitService: Boba<ScriptCommitService>,
+	ScriptContext: Boba<ScriptContext>,
+	ScriptDebugger: Boba<ScriptDebugger>,
+	ScriptDocument: Boba<ScriptDocument>,
+	ScriptEditorService: Boba<ScriptEditorService>,
+	ScriptProfilerService: Boba<ScriptProfilerService>,
+	ScriptRegistrationService: Boba<ScriptRegistrationService>,
+	ScriptRuntime: Boba<ScriptRuntime>,
+	ScriptService: Boba<ScriptService>,
+	ScrollingFrame: Boba<ScrollingFrame>,
+	Seat: Boba<Seat>,
+	Selection: Boba<Selection>,
+	SelectionBox: Boba<SelectionBox>,
+	SelectionHighlightManager: Boba<SelectionHighlightManager>,
+	SelectionLasso: Boba<SelectionLasso>,
+	SelectionPartLasso: Boba<SelectionPartLasso>,
+	SelectionPointLasso: Boba<SelectionPointLasso>,
+	SelectionSphere: Boba<SelectionSphere>,
+	SensorBase: Boba<SensorBase>,
+	SerializationService: Boba<SerializationService>,
+	ServerReplicator: Boba<ServerReplicator>,
+	ServerScriptService: Boba<ServerScriptService>,
+	ServerStorage: Boba<ServerStorage>,
+	ServiceVisibilityService: Boba<ServiceVisibilityService>,
+	SessionCheckService: Boba<SessionCheckService>,
+	SessionService: Boba<SessionService>,
+	SharedTableRegistry: Boba<SharedTableRegistry>,
+	Shirt: Boba<Shirt>,
+	ShirtGraphic: Boba<ShirtGraphic>,
+	SkateboardController: Boba<SkateboardController>,
+	SkateboardPlatform: Boba<SkateboardPlatform>,
+	Skin: Boba<Skin>,
+	Sky: Boba<Sky>,
+	SlidingBallConstraint: Boba<SlidingBallConstraint>,
+	SlimContentProvider: Boba<SlimContentProvider>,
+	SlimService: Boba<SlimService>,
+	Smoke: Boba<Smoke>,
+	SmoothVoxelsUpgraderService: Boba<SmoothVoxelsUpgraderService>,
+	Snap: Boba<Snap>,
+	SnippetService: Boba<SnippetService>,
+	SocialService: Boba<SocialService>,
+	SolidModelContentProvider: Boba<SolidModelContentProvider>,
+	Sound: Boba<Sound>,
+	SoundEffect: Boba<SoundEffect>,
+	SoundGroup: Boba<SoundGroup>,
+	SoundService: Boba<SoundService>,
+	SoundShimService: Boba<SoundShimService>,
+	Sparkles: Boba<Sparkles>,
+	SpawnLocation: Boba<SpawnLocation>,
+	SpawnerService: Boba<SpawnerService>,
+	SpecialMesh: Boba<SpecialMesh>,
+	SphereHandleAdornment: Boba<SphereHandleAdornment>,
+	SpotLight: Boba<SpotLight>,
+	SpringConstraint: Boba<SpringConstraint>,
+	StackFrame: Boba<StackFrame>,
+	StandalonePluginScripts: Boba<StandalonePluginScripts>,
+	StandardPages: Boba<StandardPages>,
+	StartPageService: Boba<StartPageService>,
+	StarterCharacterScripts: Boba<StarterCharacterScripts>,
+	StarterGear: Boba<StarterGear>,
+	StarterGui: Boba<StarterGui>,
+	StarterPack: Boba<StarterPack>,
+	StarterPlayer: Boba<StarterPlayer>,
+	StarterPlayerScripts: Boba<StarterPlayerScripts>,
+	StartupMessageService: Boba<StartupMessageService>,
+	Stats: Boba<Stats>,
+	StatsItem: Boba<StatsItem>,
+	Status: Boba<Status>,
+	StopWatchReporter: Boba<StopWatchReporter>,
+	StreamingService: Boba<StreamingService>,
+	StringValue: Boba<StringValue>,
+	Studio: Boba<Studio>,
+	StudioAssetService: Boba<StudioAssetService>,
+	StudioAttachment: Boba<StudioAttachment>,
+	StudioCallout: Boba<StudioCallout>,
+	StudioCameraService: Boba<StudioCameraService>,
+	StudioData: Boba<StudioData>,
+	StudioDeviceEmulatorService: Boba<StudioDeviceEmulatorService>,
+	StudioObjectBase: Boba<StudioObjectBase>,
+	StudioPublishService: Boba<StudioPublishService>,
+	StudioScriptDebugEventListener: Boba<StudioScriptDebugEventListener>,
+	StudioSdkService: Boba<StudioSdkService>,
+	StudioService: Boba<StudioService>,
+	StudioTheme: Boba<StudioTheme>,
+	StudioUserService: Boba<StudioUserService>,
+	StudioWidget: Boba<StudioWidget>,
+	StudioWidgetsService: Boba<StudioWidgetsService>,
+	StyleBase: Boba<StyleBase>,
+	StyleDerive: Boba<StyleDerive>,
+	StyleLink: Boba<StyleLink>,
+	StyleRule: Boba<StyleRule>,
+	StyleSheet: Boba<StyleSheet>,
+	StylingService: Boba<StylingService>,
+	SunRaysEffect: Boba<SunRaysEffect>,
+	SurfaceAppearance: Boba<SurfaceAppearance>,
+	SurfaceGui: Boba<SurfaceGui>,
+	SurfaceGuiBase: Boba<SurfaceGuiBase>,
+	SurfaceLight: Boba<SurfaceLight>,
+	SurfaceSelection: Boba<SurfaceSelection>,
+	SwimController: Boba<SwimController>,
+	SyncScriptBuilder: Boba<SyncScriptBuilder>,
+	SystemThemeService: Boba<SystemThemeService>,
+	TaskScheduler: Boba<TaskScheduler>,
+	Team: Boba<Team>,
+	TeamCreateData: Boba<TeamCreateData>,
+	TeamCreatePublishService: Boba<TeamCreatePublishService>,
+	TeamCreateService: Boba<TeamCreateService>,
+	Teams: Boba<Teams>,
+	TelemetryService: Boba<TelemetryService>,
+	TeleportAsyncResult: Boba<TeleportAsyncResult>,
+	TeleportOptions: Boba<TeleportOptions>,
+	TeleportService: Boba<TeleportService>,
+	TemporaryCageMeshProvider: Boba<TemporaryCageMeshProvider>,
+	TemporaryScriptService: Boba<TemporaryScriptService>,
+	Terrain: Boba<Terrain>,
+	TerrainDetail: Boba<TerrainDetail>,
+	TerrainIterateOperation: Boba<TerrainIterateOperation>,
+	TerrainModifyOperation: Boba<TerrainModifyOperation>,
+	TerrainReadOperation: Boba<TerrainReadOperation>,
+	TerrainRegion: Boba<TerrainRegion>,
+	TerrainWriteOperation: Boba<TerrainWriteOperation>,
+	TestService: Boba<TestService>,
+	TextBox: Boba<TextBox>,
+	TextBoxService: Boba<TextBoxService>,
+	TextButton: Boba<TextButton>,
+	TextChannel: Boba<TextChannel>,
+	TextChatCommand: Boba<TextChatCommand>,
+	TextChatConfigurations: Boba<TextChatConfigurations>,
+	TextChatMessage: Boba<TextChatMessage>,
+	TextChatMessageProperties: Boba<TextChatMessageProperties>,
+	TextChatService: Boba<TextChatService>,
+	TextFilterResult: Boba<TextFilterResult>,
+	TextFilterTranslatedResult: Boba<TextFilterTranslatedResult>,
+	TextGenerator: Boba<TextGenerator>,
+	TextLabel: Boba<TextLabel>,
+	TextService: Boba<TextService>,
+	TextSource: Boba<TextSource>,
+	Texture: Boba<Texture>,
+	TextureGenerationPartGroup: Boba<TextureGenerationPartGroup>,
+	TextureGenerationService: Boba<TextureGenerationService>,
+	TextureGenerationUnwrappingRequest: Boba<TextureGenerationUnwrappingRequest>,
+	ThirdPartyUserService: Boba<ThirdPartyUserService>,
+	ThreadState: Boba<ThreadState>,
+	TimerService: Boba<TimerService>,
+	ToastNotificationService: Boba<ToastNotificationService>,
+	Tool: Boba<Tool>,
+	Torque: Boba<Torque>,
+	TorsionSpringConstraint: Boba<TorsionSpringConstraint>,
+	TotalCountTimeIntervalItem: Boba<TotalCountTimeIntervalItem>,
+	TouchInputService: Boba<TouchInputService>,
+	TracerService: Boba<TracerService>,
+	TrackerLodController: Boba<TrackerLodController>,
+	TrackerStreamAnimation: Boba<TrackerStreamAnimation>,
+	Trail: Boba<Trail>,
+	Translator: Boba<Translator>,
+	TremoloSoundEffect: Boba<TremoloSoundEffect>,
+	TriangleMeshPart: Boba<TriangleMeshPart>,
+	TrussPart: Boba<TrussPart>,
+	TutorialService: Boba<TutorialService>,
+	Tween: Boba<Tween>,
+	TweenService: Boba<TweenService>,
+	UGCAvatarService: Boba<UGCAvatarService>,
+	UGCValidationService: Boba<UGCValidationService>,
+	UIAspectRatioConstraint: Boba<UIAspectRatioConstraint>,
+	UIBase: Boba<UIBase>,
+	UIComponent: Boba<UIComponent>,
+	UIConstraint: Boba<UIConstraint>,
+	UICorner: Boba<UICorner>,
+	UIDragDetector: Boba<UIDragDetector>,
+	UIDragDetectorService: Boba<UIDragDetectorService>,
+	UIFlexItem: Boba<UIFlexItem>,
+	UIGradient: Boba<UIGradient>,
+	UIGridLayout: Boba<UIGridLayout>,
+	UILayout: Boba<UILayout>,
+	UIListLayout: Boba<UIListLayout>,
+	UIPadding: Boba<UIPadding>,
+	UIPageLayout: Boba<UIPageLayout>,
+	UIScale: Boba<UIScale>,
+	UISizeConstraint: Boba<UISizeConstraint>,
+	UIStroke: Boba<UIStroke>,
+	UITableLayout: Boba<UITableLayout>,
+	UITextSizeConstraint: Boba<UITextSizeConstraint>,
+	UnionOperation: Boba<UnionOperation>,
+	UniqueIdLookupService: Boba<UniqueIdLookupService>,
+	UniversalConstraint: Boba<UniversalConstraint>,
+	UnreliableRemoteEvent: Boba<UnreliableRemoteEvent>,
+	UnvalidatedAssetService: Boba<UnvalidatedAssetService>,
+	UserGameSettings: Boba<UserGameSettings>,
+	UserInputService: Boba<UserInputService>,
+	UserService: Boba<UserService>,
+	UserSettings: Boba<UserSettings>,
+	UserStorageService: Boba<UserStorageService>,
+	VRService: Boba<VRService>,
+	VRStatusService: Boba<VRStatusService>,
+	ValueBase: Boba<ValueBase>,
+	Vector3Curve: Boba<Vector3Curve>,
+	Vector3Value: Boba<Vector3Value>,
+	VectorForce: Boba<VectorForce>,
+	VehicleController: Boba<VehicleController>,
+	VehicleSeat: Boba<VehicleSeat>,
+	VelocityMotor: Boba<VelocityMotor>,
+	VersionControlService: Boba<VersionControlService>,
+	VideoCapture: Boba<VideoCapture>,
+	VideoCaptureService: Boba<VideoCaptureService>,
+	VideoDeviceInput: Boba<VideoDeviceInput>,
+	VideoFrame: Boba<VideoFrame>,
+	VideoService: Boba<VideoService>,
+	ViewportFrame: Boba<ViewportFrame>,
+	VirtualInputManager: Boba<VirtualInputManager>,
+	VirtualUser: Boba<VirtualUser>,
+	VisibilityCheckDispatcher: Boba<VisibilityCheckDispatcher>,
+	Visit: Boba<Visit>,
+	VisualizationMode: Boba<VisualizationMode>,
+	VisualizationModeCategory: Boba<VisualizationModeCategory>,
+	VisualizationModeService: Boba<VisualizationModeService>,
+	VoiceChatService: Boba<VoiceChatService>,
+	WebSocketClient: Boba<WebSocketClient>,
+	WebSocketService: Boba<WebSocketService>,
+	WebStreamClient: Boba<WebStreamClient>,
+	WebViewService: Boba<WebViewService>,
+	WedgePart: Boba<WedgePart>,
+	Weld: Boba<Weld>,
+	WeldConstraint: Boba<WeldConstraint>,
+	Wire: Boba<Wire>,
+	WireframeHandleAdornment: Boba<WireframeHandleAdornment>,
+	Workspace: Boba<Workspace>,
+	WorkspaceAnnotation: Boba<WorkspaceAnnotation>,
+	WorldModel: Boba<WorldModel>,
+	WorldRoot: Boba<WorldRoot>,
+	WrapDeformer: Boba<WrapDeformer>,
+	WrapLayer: Boba<WrapLayer>,
+	WrapTarget: Boba<WrapTarget>,
+}
+-- boba: end roblox instances typegen
+
+-- boba: start roblox data types codegen
 ext.Axes = Boba.Typeof("Axes") :: Boba<Axes>
 ext.BrickColor = Boba.Typeof("BrickColor") :: Boba<BrickColor>
 ext.CatalogSearchParams = Boba.Typeof("CatalogSearchParams") :: Boba<CatalogSearchParams>
@@ -88,802 +915,7 @@ ext.Vector2 = Boba.Typeof("Vector2") :: Boba<Vector2>
 ext.Vector2int16 = Boba.Typeof("Vector2int16") :: Boba<Vector2int16>
 ext.Vector3 = Boba.Typeof("Vector3") :: Boba<Vector3>
 ext.Vector3int16 = Boba.Typeof("Vector3int16") :: Boba<Vector3int16>
-
-ext.Accessory = isA("Accessory") :: Boba<Accessory>
-ext.AccessoryDescription = isA("AccessoryDescription") :: Boba<AccessoryDescription>
-ext.AccountService = isA("AccountService") :: Boba<AccountService>
-ext.Accoutrement = isA("Accoutrement") :: Boba<Accoutrement>
-ext.AchievementService = isA("AchievementService") :: Boba<AchievementService>
-ext.ActivityHistoryEventService = isA("ActivityHistoryEventService") :: Boba<ActivityHistoryEventService>
-ext.Actor = isA("Actor") :: Boba<Actor>
-ext.AdGui = isA("AdGui") :: Boba<AdGui>
-ext.AdPortal = isA("AdPortal") :: Boba<AdPortal>
-ext.AdService = isA("AdService") :: Boba<AdService>
-ext.AdvancedDragger = isA("AdvancedDragger") :: Boba<AdvancedDragger>
-ext.AirController = isA("AirController") :: Boba<AirController>
-ext.AlignOrientation = isA("AlignOrientation") :: Boba<AlignOrientation>
-ext.AlignPosition = isA("AlignPosition") :: Boba<AlignPosition>
-ext.AnalyticsService = isA("AnalyticsService") :: Boba<AnalyticsService>
-ext.AngularVelocity = isA("AngularVelocity") :: Boba<AngularVelocity>
-ext.Animation = isA("Animation") :: Boba<Animation>
-ext.AnimationClip = isA("AnimationClip") :: Boba<AnimationClip>
-ext.AnimationClipProvider = isA("AnimationClipProvider") :: Boba<AnimationClipProvider>
-ext.AnimationController = isA("AnimationController") :: Boba<AnimationController>
-ext.AnimationFromVideoCreatorService = isA("AnimationFromVideoCreatorService") :: Boba<AnimationFromVideoCreatorService>
-ext.AnimationFromVideoCreatorStudioService = isA("AnimationFromVideoCreatorStudioService") :: Boba<AnimationFromVideoCreatorStudioService>
-ext.AnimationImportData = isA("AnimationImportData") :: Boba<AnimationImportData>
-ext.AnimationRigData = isA("AnimationRigData") :: Boba<AnimationRigData>
-ext.AnimationStreamTrack = isA("AnimationStreamTrack") :: Boba<AnimationStreamTrack>
-ext.AnimationTrack = isA("AnimationTrack") :: Boba<AnimationTrack>
-ext.Animator = isA("Animator") :: Boba<Animator>
-ext.Annotation = isA("Annotation") :: Boba<Annotation>
-ext.AnnotationsService = isA("AnnotationsService") :: Boba<AnnotationsService>
-ext.AppLifecycleObserverService = isA("AppLifecycleObserverService") :: Boba<AppLifecycleObserverService>
-ext.AppRatingPromptService = isA("AppRatingPromptService") :: Boba<AppRatingPromptService>
-ext.AppStorageService = isA("AppStorageService") :: Boba<AppStorageService>
-ext.AppUpdateService = isA("AppUpdateService") :: Boba<AppUpdateService>
-ext.ArcHandles = isA("ArcHandles") :: Boba<ArcHandles>
-ext.AssetCounterService = isA("AssetCounterService") :: Boba<AssetCounterService>
-ext.AssetDeliveryProxy = isA("AssetDeliveryProxy") :: Boba<AssetDeliveryProxy>
-ext.AssetImportService = isA("AssetImportService") :: Boba<AssetImportService>
-ext.AssetImportSession = isA("AssetImportSession") :: Boba<AssetImportSession>
-ext.AssetManagerService = isA("AssetManagerService") :: Boba<AssetManagerService>
-ext.AssetPatchSettings = isA("AssetPatchSettings") :: Boba<AssetPatchSettings>
-ext.AssetService = isA("AssetService") :: Boba<AssetService>
-ext.AssetSoundEffect = isA("AssetSoundEffect") :: Boba<AssetSoundEffect>
-ext.Atmosphere = isA("Atmosphere") :: Boba<Atmosphere>
-ext.AtmosphereSensor = isA("AtmosphereSensor") :: Boba<AtmosphereSensor>
-ext.Attachment = isA("Attachment") :: Boba<Attachment>
-ext.AudioAnalyzer = isA("AudioAnalyzer") :: Boba<AudioAnalyzer>
-ext.AudioChannelMixer = isA("AudioChannelMixer") :: Boba<AudioChannelMixer>
-ext.AudioChannelSplitter = isA("AudioChannelSplitter") :: Boba<AudioChannelSplitter>
-ext.AudioChorus = isA("AudioChorus") :: Boba<AudioChorus>
-ext.AudioCompressor = isA("AudioCompressor") :: Boba<AudioCompressor>
-ext.AudioDeviceInput = isA("AudioDeviceInput") :: Boba<AudioDeviceInput>
-ext.AudioDeviceOutput = isA("AudioDeviceOutput") :: Boba<AudioDeviceOutput>
-ext.AudioDistortion = isA("AudioDistortion") :: Boba<AudioDistortion>
-ext.AudioEcho = isA("AudioEcho") :: Boba<AudioEcho>
-ext.AudioEmitter = isA("AudioEmitter") :: Boba<AudioEmitter>
-ext.AudioEqualizer = isA("AudioEqualizer") :: Boba<AudioEqualizer>
-ext.AudioFader = isA("AudioFader") :: Boba<AudioFader>
-ext.AudioFilter = isA("AudioFilter") :: Boba<AudioFilter>
-ext.AudioFlanger = isA("AudioFlanger") :: Boba<AudioFlanger>
-ext.AudioFocusService = isA("AudioFocusService") :: Boba<AudioFocusService>
-ext.AudioGate = isA("AudioGate") :: Boba<AudioGate>
-ext.AudioLimiter = isA("AudioLimiter") :: Boba<AudioLimiter>
-ext.AudioListener = isA("AudioListener") :: Boba<AudioListener>
-ext.AudioPages = isA("AudioPages") :: Boba<AudioPages>
-ext.AudioPitchShifter = isA("AudioPitchShifter") :: Boba<AudioPitchShifter>
-ext.AudioPlayer = isA("AudioPlayer") :: Boba<AudioPlayer>
-ext.AudioReverb = isA("AudioReverb") :: Boba<AudioReverb>
-ext.AudioSearchParams = isA("AudioSearchParams") :: Boba<AudioSearchParams>
-ext.AudioTextToSpeech = isA("AudioTextToSpeech") :: Boba<AudioTextToSpeech>
-ext.AudioTremolo = isA("AudioTremolo") :: Boba<AudioTremolo>
-ext.AuroraScriptObject = isA("AuroraScriptObject") :: Boba<AuroraScriptObject>
-ext.AvatarAccessoryRules = isA("AvatarAccessoryRules") :: Boba<AvatarAccessoryRules>
-ext.AvatarAnimationRules = isA("AvatarAnimationRules") :: Boba<AvatarAnimationRules>
-ext.AvatarBodyRules = isA("AvatarBodyRules") :: Boba<AvatarBodyRules>
-ext.AvatarChatService = isA("AvatarChatService") :: Boba<AvatarChatService>
-ext.AvatarClothingRules = isA("AvatarClothingRules") :: Boba<AvatarClothingRules>
-ext.AvatarCollisionRules = isA("AvatarCollisionRules") :: Boba<AvatarCollisionRules>
-ext.AvatarCreationService = isA("AvatarCreationService") :: Boba<AvatarCreationService>
-ext.AvatarEditorService = isA("AvatarEditorService") :: Boba<AvatarEditorService>
-ext.AvatarImportService = isA("AvatarImportService") :: Boba<AvatarImportService>
-ext.AvatarRules = isA("AvatarRules") :: Boba<AvatarRules>
-ext.AvatarSettings = isA("AvatarSettings") :: Boba<AvatarSettings>
-ext.Backpack = isA("Backpack") :: Boba<Backpack>
-ext.BackpackItem = isA("BackpackItem") :: Boba<BackpackItem>
-ext.BadgeService = isA("BadgeService") :: Boba<BadgeService>
-ext.BallSocketConstraint = isA("BallSocketConstraint") :: Boba<BallSocketConstraint>
-ext.BanHistoryPages = isA("BanHistoryPages") :: Boba<BanHistoryPages>
-ext.BaseImportData = isA("BaseImportData") :: Boba<BaseImportData>
-ext.BasePlayerGui = isA("BasePlayerGui") :: Boba<BasePlayerGui>
-ext.BaseRemoteEvent = isA("BaseRemoteEvent") :: Boba<BaseRemoteEvent>
-ext.BaseScript = isA("BaseScript") :: Boba<BaseScript>
-ext.BaseWrap = isA("BaseWrap") :: Boba<BaseWrap>
-ext.Beam = isA("Beam") :: Boba<Beam>
-ext.BillboardGui = isA("BillboardGui") :: Boba<BillboardGui>
-ext.BinaryStringValue = isA("BinaryStringValue") :: Boba<BinaryStringValue>
-ext.BindableEvent = isA("BindableEvent") :: Boba<BindableEvent>
-ext.BindableFunction = isA("BindableFunction") :: Boba<BindableFunction>
-ext.BlockMesh = isA("BlockMesh") :: Boba<BlockMesh>
-ext.BloomEffect = isA("BloomEffect") :: Boba<BloomEffect>
-ext.BlurEffect = isA("BlurEffect") :: Boba<BlurEffect>
-ext.BodyAngularVelocity = isA("BodyAngularVelocity") :: Boba<BodyAngularVelocity>
-ext.BodyColors = isA("BodyColors") :: Boba<BodyColors>
-ext.BodyForce = isA("BodyForce") :: Boba<BodyForce>
-ext.BodyGyro = isA("BodyGyro") :: Boba<BodyGyro>
-ext.BodyMover = isA("BodyMover") :: Boba<BodyMover>
-ext.BodyPartDescription = isA("BodyPartDescription") :: Boba<BodyPartDescription>
-ext.BodyPosition = isA("BodyPosition") :: Boba<BodyPosition>
-ext.BodyThrust = isA("BodyThrust") :: Boba<BodyThrust>
-ext.BodyVelocity = isA("BodyVelocity") :: Boba<BodyVelocity>
-ext.Bone = isA("Bone") :: Boba<Bone>
-ext.BoolValue = isA("BoolValue") :: Boba<BoolValue>
-ext.BoxHandleAdornment = isA("BoxHandleAdornment") :: Boba<BoxHandleAdornment>
-ext.Breakpoint = isA("Breakpoint") :: Boba<Breakpoint>
-ext.BrickColorValue = isA("BrickColorValue") :: Boba<BrickColorValue>
-ext.BrowserService = isA("BrowserService") :: Boba<BrowserService>
-ext.BubbleChatConfiguration = isA("BubbleChatConfiguration") :: Boba<BubbleChatConfiguration>
-ext.BubbleChatMessageProperties = isA("BubbleChatMessageProperties") :: Boba<BubbleChatMessageProperties>
-ext.BugReporterService = isA("BugReporterService") :: Boba<BugReporterService>
-ext.BulkImportService = isA("BulkImportService") :: Boba<BulkImportService>
-ext.BuoyancySensor = isA("BuoyancySensor") :: Boba<BuoyancySensor>
-ext.CFrameValue = isA("CFrameValue") :: Boba<CFrameValue>
-ext.CSGDictionaryService = isA("CSGDictionaryService") :: Boba<CSGDictionaryService>
-ext.CacheableContentProvider = isA("CacheableContentProvider") :: Boba<CacheableContentProvider>
-ext.CalloutService = isA("CalloutService") :: Boba<CalloutService>
-ext.Camera = isA("Camera") :: Boba<Camera>
-ext.CanvasGroup = isA("CanvasGroup") :: Boba<CanvasGroup>
-ext.Capture = isA("Capture") :: Boba<Capture>
-ext.CaptureService = isA("CaptureService") :: Boba<CaptureService>
-ext.CapturesPages = isA("CapturesPages") :: Boba<CapturesPages>
-ext.CatalogPages = isA("CatalogPages") :: Boba<CatalogPages>
-ext.ChangeHistoryService = isA("ChangeHistoryService") :: Boba<ChangeHistoryService>
-ext.ChangeHistoryStreamingService = isA("ChangeHistoryStreamingService") :: Boba<ChangeHistoryStreamingService>
-ext.ChannelTabsConfiguration = isA("ChannelTabsConfiguration") :: Boba<ChannelTabsConfiguration>
-ext.CharacterAppearance = isA("CharacterAppearance") :: Boba<CharacterAppearance>
-ext.CharacterMesh = isA("CharacterMesh") :: Boba<CharacterMesh>
-ext.Chat = isA("Chat") :: Boba<Chat>
-ext.ChatInputBarConfiguration = isA("ChatInputBarConfiguration") :: Boba<ChatInputBarConfiguration>
-ext.ChatWindowConfiguration = isA("ChatWindowConfiguration") :: Boba<ChatWindowConfiguration>
-ext.ChatWindowMessageProperties = isA("ChatWindowMessageProperties") :: Boba<ChatWindowMessageProperties>
-ext.ChatbotUIService = isA("ChatbotUIService") :: Boba<ChatbotUIService>
-ext.ChorusSoundEffect = isA("ChorusSoundEffect") :: Boba<ChorusSoundEffect>
-ext.ClickDetector = isA("ClickDetector") :: Boba<ClickDetector>
-ext.ClientReplicator = isA("ClientReplicator") :: Boba<ClientReplicator>
-ext.ClimbController = isA("ClimbController") :: Boba<ClimbController>
-ext.Clothing = isA("Clothing") :: Boba<Clothing>
-ext.CloudCRUDService = isA("CloudCRUDService") :: Boba<CloudCRUDService>
-ext.CloudLocalizationTable = isA("CloudLocalizationTable") :: Boba<CloudLocalizationTable>
-ext.Clouds = isA("Clouds") :: Boba<Clouds>
-ext.ClusterPacketCache = isA("ClusterPacketCache") :: Boba<ClusterPacketCache>
-ext.Collaborator = isA("Collaborator") :: Boba<Collaborator>
-ext.CollaboratorsService = isA("CollaboratorsService") :: Boba<CollaboratorsService>
-ext.CollectionService = isA("CollectionService") :: Boba<CollectionService>
-ext.Color3Value = isA("Color3Value") :: Boba<Color3Value>
-ext.ColorCorrectionEffect = isA("ColorCorrectionEffect") :: Boba<ColorCorrectionEffect>
-ext.ColorGradingEffect = isA("ColorGradingEffect") :: Boba<ColorGradingEffect>
-ext.CommerceService = isA("CommerceService") :: Boba<CommerceService>
-ext.CompressorSoundEffect = isA("CompressorSoundEffect") :: Boba<CompressorSoundEffect>
-ext.ConeHandleAdornment = isA("ConeHandleAdornment") :: Boba<ConeHandleAdornment>
-ext.ConfigService = isA("ConfigService") :: Boba<ConfigService>
-ext.ConfigSnapshot = isA("ConfigSnapshot") :: Boba<ConfigSnapshot>
-ext.Configuration = isA("Configuration") :: Boba<Configuration>
-ext.ConfigureServerService = isA("ConfigureServerService") :: Boba<ConfigureServerService>
-ext.ConnectivityService = isA("ConnectivityService") :: Boba<ConnectivityService>
-ext.Constraint = isA("Constraint") :: Boba<Constraint>
-ext.ContentProvider = isA("ContentProvider") :: Boba<ContentProvider>
-ext.ContextActionService = isA("ContextActionService") :: Boba<ContextActionService>
-ext.Controller = isA("Controller") :: Boba<Controller>
-ext.ControllerBase = isA("ControllerBase") :: Boba<ControllerBase>
-ext.ControllerManager = isA("ControllerManager") :: Boba<ControllerManager>
-ext.ControllerPartSensor = isA("ControllerPartSensor") :: Boba<ControllerPartSensor>
-ext.ControllerSensor = isA("ControllerSensor") :: Boba<ControllerSensor>
-ext.ControllerService = isA("ControllerService") :: Boba<ControllerService>
-ext.ConversationalAIAcceptanceService = isA("ConversationalAIAcceptanceService") :: Boba<ConversationalAIAcceptanceService>
-ext.CookiesService = isA("CookiesService") :: Boba<CookiesService>
-ext.CoreGui = isA("CoreGui") :: Boba<CoreGui>
-ext.CorePackages = isA("CorePackages") :: Boba<CorePackages>
-ext.CoreScript = isA("CoreScript") :: Boba<CoreScript>
-ext.CoreScriptDebuggingManagerHelper = isA("CoreScriptDebuggingManagerHelper") :: Boba<CoreScriptDebuggingManagerHelper>
-ext.CoreScriptSyncService = isA("CoreScriptSyncService") :: Boba<CoreScriptSyncService>
-ext.CornerWedgePart = isA("CornerWedgePart") :: Boba<CornerWedgePart>
-ext.CreationDBService = isA("CreationDBService") :: Boba<CreationDBService>
-ext.CreatorStoreService = isA("CreatorStoreService") :: Boba<CreatorStoreService>
-ext.CrossDMScriptChangeListener = isA("CrossDMScriptChangeListener") :: Boba<CrossDMScriptChangeListener>
-ext.CurveAnimation = isA("CurveAnimation") :: Boba<CurveAnimation>
-ext.CustomEvent = isA("CustomEvent") :: Boba<CustomEvent>
-ext.CustomEventReceiver = isA("CustomEventReceiver") :: Boba<CustomEventReceiver>
-ext.CustomLog = isA("CustomLog") :: Boba<CustomLog>
-ext.CustomSoundEffect = isA("CustomSoundEffect") :: Boba<CustomSoundEffect>
-ext.CylinderHandleAdornment = isA("CylinderHandleAdornment") :: Boba<CylinderHandleAdornment>
-ext.CylinderMesh = isA("CylinderMesh") :: Boba<CylinderMesh>
-ext.CylindricalConstraint = isA("CylindricalConstraint") :: Boba<CylindricalConstraint>
-ext.DataModel = isA("DataModel") :: Boba<DataModel>
-ext.DataModelPatchService = isA("DataModelPatchService") :: Boba<DataModelPatchService>
-ext.DataModelSession = isA("DataModelSession") :: Boba<DataModelSession>
-ext.DataStore = isA("DataStore") :: Boba<DataStore>
-ext.DataStoreGetOptions = isA("DataStoreGetOptions") :: Boba<DataStoreGetOptions>
-ext.DataStoreIncrementOptions = isA("DataStoreIncrementOptions") :: Boba<DataStoreIncrementOptions>
-ext.DataStoreInfo = isA("DataStoreInfo") :: Boba<DataStoreInfo>
-ext.DataStoreKey = isA("DataStoreKey") :: Boba<DataStoreKey>
-ext.DataStoreKeyInfo = isA("DataStoreKeyInfo") :: Boba<DataStoreKeyInfo>
-ext.DataStoreKeyPages = isA("DataStoreKeyPages") :: Boba<DataStoreKeyPages>
-ext.DataStoreListingPages = isA("DataStoreListingPages") :: Boba<DataStoreListingPages>
-ext.DataStoreObjectVersionInfo = isA("DataStoreObjectVersionInfo") :: Boba<DataStoreObjectVersionInfo>
-ext.DataStoreOptions = isA("DataStoreOptions") :: Boba<DataStoreOptions>
-ext.DataStorePages = isA("DataStorePages") :: Boba<DataStorePages>
-ext.DataStoreService = isA("DataStoreService") :: Boba<DataStoreService>
-ext.DataStoreSetOptions = isA("DataStoreSetOptions") :: Boba<DataStoreSetOptions>
-ext.DataStoreVersionPages = isA("DataStoreVersionPages") :: Boba<DataStoreVersionPages>
-ext.Debris = isA("Debris") :: Boba<Debris>
-ext.DebuggablePluginWatcher = isA("DebuggablePluginWatcher") :: Boba<DebuggablePluginWatcher>
-ext.DebuggerBreakpoint = isA("DebuggerBreakpoint") :: Boba<DebuggerBreakpoint>
-ext.DebuggerConnection = isA("DebuggerConnection") :: Boba<DebuggerConnection>
-ext.DebuggerConnectionManager = isA("DebuggerConnectionManager") :: Boba<DebuggerConnectionManager>
-ext.DebuggerLuaResponse = isA("DebuggerLuaResponse") :: Boba<DebuggerLuaResponse>
-ext.DebuggerManager = isA("DebuggerManager") :: Boba<DebuggerManager>
-ext.DebuggerUIService = isA("DebuggerUIService") :: Boba<DebuggerUIService>
-ext.DebuggerVariable = isA("DebuggerVariable") :: Boba<DebuggerVariable>
-ext.DebuggerWatch = isA("DebuggerWatch") :: Boba<DebuggerWatch>
-ext.Decal = isA("Decal") :: Boba<Decal>
-ext.DepthOfFieldEffect = isA("DepthOfFieldEffect") :: Boba<DepthOfFieldEffect>
-ext.DeviceIdService = isA("DeviceIdService") :: Boba<DeviceIdService>
-ext.Dialog = isA("Dialog") :: Boba<Dialog>
-ext.DialogChoice = isA("DialogChoice") :: Boba<DialogChoice>
-ext.DistortionSoundEffect = isA("DistortionSoundEffect") :: Boba<DistortionSoundEffect>
-ext.DockWidgetPluginGui = isA("DockWidgetPluginGui") :: Boba<DockWidgetPluginGui>
-ext.DoubleConstrainedValue = isA("DoubleConstrainedValue") :: Boba<DoubleConstrainedValue>
-ext.DraftsService = isA("DraftsService") :: Boba<DraftsService>
-ext.DragDetector = isA("DragDetector") :: Boba<DragDetector>
-ext.Dragger = isA("Dragger") :: Boba<Dragger>
-ext.DraggerService = isA("DraggerService") :: Boba<DraggerService>
-ext.DynamicRotate = isA("DynamicRotate") :: Boba<DynamicRotate>
-ext.EchoSoundEffect = isA("EchoSoundEffect") :: Boba<EchoSoundEffect>
-ext.EditableImage = isA("EditableImage") :: Boba<EditableImage>
-ext.EditableMesh = isA("EditableMesh") :: Boba<EditableMesh>
-ext.EditableService = isA("EditableService") :: Boba<EditableService>
-ext.EmotesPages = isA("EmotesPages") :: Boba<EmotesPages>
-ext.EqualizerSoundEffect = isA("EqualizerSoundEffect") :: Boba<EqualizerSoundEffect>
-ext.EulerRotationCurve = isA("EulerRotationCurve") :: Boba<EulerRotationCurve>
-ext.EventIngestService = isA("EventIngestService") :: Boba<EventIngestService>
-ext.ExampleV2Service = isA("ExampleV2Service") :: Boba<ExampleV2Service>
-ext.ExecutedRemoteCommand = isA("ExecutedRemoteCommand") :: Boba<ExecutedRemoteCommand>
-ext.ExperienceAuthService = isA("ExperienceAuthService") :: Boba<ExperienceAuthService>
-ext.ExperienceInviteOptions = isA("ExperienceInviteOptions") :: Boba<ExperienceInviteOptions>
-ext.ExperienceNotificationService = isA("ExperienceNotificationService") :: Boba<ExperienceNotificationService>
-ext.ExperienceService = isA("ExperienceService") :: Boba<ExperienceService>
-ext.ExperienceStateCaptureService = isA("ExperienceStateCaptureService") :: Boba<ExperienceStateCaptureService>
-ext.ExperienceStateRecordingService = isA("ExperienceStateRecordingService") :: Boba<ExperienceStateRecordingService>
-ext.ExplorerFilter = isA("ExplorerFilter") :: Boba<ExplorerFilter>
-ext.ExplorerFilterAutocompleter = isA("ExplorerFilterAutocompleter") :: Boba<ExplorerFilterAutocompleter>
-ext.ExplorerServiceVisibilityService = isA("ExplorerServiceVisibilityService") :: Boba<ExplorerServiceVisibilityService>
-ext.Explosion = isA("Explosion") :: Boba<Explosion>
-ext.FaceAnimatorService = isA("FaceAnimatorService") :: Boba<FaceAnimatorService>
-ext.FaceControls = isA("FaceControls") :: Boba<FaceControls>
-ext.FacialAgeEstimationService = isA("FacialAgeEstimationService") :: Boba<FacialAgeEstimationService>
-ext.FacialAnimationRecordingService = isA("FacialAnimationRecordingService") :: Boba<FacialAnimationRecordingService>
-ext.FacialAnimationStreamingServiceStats = isA("FacialAnimationStreamingServiceStats") :: Boba<FacialAnimationStreamingServiceStats>
-ext.FacialAnimationStreamingServiceV2 = isA("FacialAnimationStreamingServiceV2") :: Boba<FacialAnimationStreamingServiceV2>
-ext.FacialAnimationStreamingSubsessionStats = isA("FacialAnimationStreamingSubsessionStats") :: Boba<FacialAnimationStreamingSubsessionStats>
-ext.FacsImportData = isA("FacsImportData") :: Boba<FacsImportData>
-ext.Feature = isA("Feature") :: Boba<Feature>
-ext.FeatureRestrictionManager = isA("FeatureRestrictionManager") :: Boba<FeatureRestrictionManager>
-ext.File = isA("File") :: Boba<File>
-ext.FileMesh = isA("FileMesh") :: Boba<FileMesh>
-ext.Fire = isA("Fire") :: Boba<Fire>
-ext.Flag = isA("Flag") :: Boba<Flag>
-ext.FlagStand = isA("FlagStand") :: Boba<FlagStand>
-ext.FlagStandService = isA("FlagStandService") :: Boba<FlagStandService>
-ext.FlangeSoundEffect = isA("FlangeSoundEffect") :: Boba<FlangeSoundEffect>
-ext.FloatCurve = isA("FloatCurve") :: Boba<FloatCurve>
-ext.FloorWire = isA("FloorWire") :: Boba<FloorWire>
-ext.FluidForceSensor = isA("FluidForceSensor") :: Boba<FluidForceSensor>
-ext.FlyweightService = isA("FlyweightService") :: Boba<FlyweightService>
-ext.Folder = isA("Folder") :: Boba<Folder>
-ext.ForceField = isA("ForceField") :: Boba<ForceField>
-ext.FormFactorPart = isA("FormFactorPart") :: Boba<FormFactorPart>
-ext.Frame = isA("Frame") :: Boba<Frame>
-ext.FriendPages = isA("FriendPages") :: Boba<FriendPages>
-ext.FriendService = isA("FriendService") :: Boba<FriendService>
-ext.FunctionalTest = isA("FunctionalTest") :: Boba<FunctionalTest>
-ext.GamePassService = isA("GamePassService") :: Boba<GamePassService>
-ext.GamepadService = isA("GamepadService") :: Boba<GamepadService>
-ext.GenerationService = isA("GenerationService") :: Boba<GenerationService>
-ext.GenericChallengeService = isA("GenericChallengeService") :: Boba<GenericChallengeService>
-ext.GenericSettings = isA("GenericSettings") :: Boba<GenericSettings>
-ext.Geometry = isA("Geometry") :: Boba<Geometry>
-ext.GeometryService = isA("GeometryService") :: Boba<GeometryService>
-ext.GetTextBoundsParams = isA("GetTextBoundsParams") :: Boba<GetTextBoundsParams>
-ext.GlobalDataStore = isA("GlobalDataStore") :: Boba<GlobalDataStore>
-ext.Glue = isA("Glue") :: Boba<Glue>
-ext.GroundController = isA("GroundController") :: Boba<GroundController>
-ext.GroupImportData = isA("GroupImportData") :: Boba<GroupImportData>
-ext.GroupService = isA("GroupService") :: Boba<GroupService>
-ext.GuiBase = isA("GuiBase") :: Boba<GuiBase>
-ext.GuiBase3d = isA("GuiBase3d") :: Boba<GuiBase3d>
-ext.GuiLabel = isA("GuiLabel") :: Boba<GuiLabel>
-ext.GuiMain = isA("GuiMain") :: Boba<GuiMain>
-ext.GuiService = isA("GuiService") :: Boba<GuiService>
-ext.GuidRegistryService = isA("GuidRegistryService") :: Boba<GuidRegistryService>
-ext.HSRDataContentProvider = isA("HSRDataContentProvider") :: Boba<HSRDataContentProvider>
-ext.HandleAdornment = isA("HandleAdornment") :: Boba<HandleAdornment>
-ext.Handles = isA("Handles") :: Boba<Handles>
-ext.HandlesBase = isA("HandlesBase") :: Boba<HandlesBase>
-ext.HapticEffect = isA("HapticEffect") :: Boba<HapticEffect>
-ext.HapticService = isA("HapticService") :: Boba<HapticService>
-ext.HarmonyService = isA("HarmonyService") :: Boba<HarmonyService>
-ext.Hat = isA("Hat") :: Boba<Hat>
-ext.HeapProfilerService = isA("HeapProfilerService") :: Boba<HeapProfilerService>
-ext.HeatmapService = isA("HeatmapService") :: Boba<HeatmapService>
-ext.HeightmapImporterService = isA("HeightmapImporterService") :: Boba<HeightmapImporterService>
-ext.HiddenSurfaceRemovalAsset = isA("HiddenSurfaceRemovalAsset") :: Boba<HiddenSurfaceRemovalAsset>
-ext.Highlight = isA("Highlight") :: Boba<Highlight>
-ext.HingeConstraint = isA("HingeConstraint") :: Boba<HingeConstraint>
-ext.Hint = isA("Hint") :: Boba<Hint>
-ext.Hole = isA("Hole") :: Boba<Hole>
-ext.Hopper = isA("Hopper") :: Boba<Hopper>
-ext.HopperBin = isA("HopperBin") :: Boba<HopperBin>
-ext.HttpRbxApiService = isA("HttpRbxApiService") :: Boba<HttpRbxApiService>
-ext.HttpRequest = isA("HttpRequest") :: Boba<HttpRequest>
-ext.HttpService = isA("HttpService") :: Boba<HttpService>
-ext.Humanoid = isA("Humanoid") :: Boba<Humanoid>
-ext.HumanoidController = isA("HumanoidController") :: Boba<HumanoidController>
-ext.HumanoidDescription = isA("HumanoidDescription") :: Boba<HumanoidDescription>
-ext.IKControl = isA("IKControl") :: Boba<IKControl>
-ext.ILegacyStudioBridge = isA("ILegacyStudioBridge") :: Boba<ILegacyStudioBridge>
-ext.IXPService = isA("IXPService") :: Boba<IXPService>
-ext.ImageButton = isA("ImageButton") :: Boba<ImageButton>
-ext.ImageHandleAdornment = isA("ImageHandleAdornment") :: Boba<ImageHandleAdornment>
-ext.ImageLabel = isA("ImageLabel") :: Boba<ImageLabel>
-ext.ImportSession = isA("ImportSession") :: Boba<ImportSession>
-ext.IncrementalPatchBuilder = isA("IncrementalPatchBuilder") :: Boba<IncrementalPatchBuilder>
-ext.InputAction = isA("InputAction") :: Boba<InputAction>
-ext.InputBinding = isA("InputBinding") :: Boba<InputBinding>
-ext.InputContext = isA("InputContext") :: Boba<InputContext>
-ext.InputObject = isA("InputObject") :: Boba<InputObject>
-ext.InsertService = isA("InsertService") :: Boba<InsertService>
-ext.InstanceAdornment = isA("InstanceAdornment") :: Boba<InstanceAdornment>
-ext.InstanceExtensionsService = isA("InstanceExtensionsService") :: Boba<InstanceExtensionsService>
-ext.IntConstrainedValue = isA("IntConstrainedValue") :: Boba<IntConstrainedValue>
-ext.IntValue = isA("IntValue") :: Boba<IntValue>
-ext.IntersectOperation = isA("IntersectOperation") :: Boba<IntersectOperation>
-ext.InventoryPages = isA("InventoryPages") :: Boba<InventoryPages>
-ext.JointImportData = isA("JointImportData") :: Boba<JointImportData>
-ext.JointInstance = isA("JointInstance") :: Boba<JointInstance>
-ext.JointsService = isA("JointsService") :: Boba<JointsService>
-ext.KeyboardService = isA("KeyboardService") :: Boba<KeyboardService>
-ext.Keyframe = isA("Keyframe") :: Boba<Keyframe>
-ext.KeyframeMarker = isA("KeyframeMarker") :: Boba<KeyframeMarker>
-ext.KeyframeSequence = isA("KeyframeSequence") :: Boba<KeyframeSequence>
-ext.KeyframeSequenceProvider = isA("KeyframeSequenceProvider") :: Boba<KeyframeSequenceProvider>
-ext.LSPFileSyncService = isA("LSPFileSyncService") :: Boba<LSPFileSyncService>
-ext.LanguageService = isA("LanguageService") :: Boba<LanguageService>
-ext.LegacyStudioBridge = isA("LegacyStudioBridge") :: Boba<LegacyStudioBridge>
-ext.Light = isA("Light") :: Boba<Light>
-ext.Lighting = isA("Lighting") :: Boba<Lighting>
-ext.LineForce = isA("LineForce") :: Boba<LineForce>
-ext.LineHandleAdornment = isA("LineHandleAdornment") :: Boba<LineHandleAdornment>
-ext.LinearVelocity = isA("LinearVelocity") :: Boba<LinearVelocity>
-ext.LinkingService = isA("LinkingService") :: Boba<LinkingService>
-ext.LiveScriptingService = isA("LiveScriptingService") :: Boba<LiveScriptingService>
-ext.LiveSyncService = isA("LiveSyncService") :: Boba<LiveSyncService>
-ext.LocalDebuggerConnection = isA("LocalDebuggerConnection") :: Boba<LocalDebuggerConnection>
-ext.LocalScript = isA("LocalScript") :: Boba<LocalScript>
-ext.LocalStorageService = isA("LocalStorageService") :: Boba<LocalStorageService>
-ext.LocalizationService = isA("LocalizationService") :: Boba<LocalizationService>
-ext.LocalizationTable = isA("LocalizationTable") :: Boba<LocalizationTable>
-ext.LodDataEntity = isA("LodDataEntity") :: Boba<LodDataEntity>
-ext.LodDataService = isA("LodDataService") :: Boba<LodDataService>
-ext.LogReporterService = isA("LogReporterService") :: Boba<LogReporterService>
-ext.LogService = isA("LogService") :: Boba<LogService>
-ext.LoginService = isA("LoginService") :: Boba<LoginService>
-ext.LuaSettings = isA("LuaSettings") :: Boba<LuaSettings>
-ext.LuaWebService = isA("LuaWebService") :: Boba<LuaWebService>
-ext.LuauScriptAnalyzerService = isA("LuauScriptAnalyzerService") :: Boba<LuauScriptAnalyzerService>
-ext.MLModelDeliveryService = isA("MLModelDeliveryService") :: Boba<MLModelDeliveryService>
-ext.MLService = isA("MLService") :: Boba<MLService>
-ext.MLSession = isA("MLSession") :: Boba<MLSession>
-ext.ManualGlue = isA("ManualGlue") :: Boba<ManualGlue>
-ext.ManualSurfaceJointInstance = isA("ManualSurfaceJointInstance") :: Boba<ManualSurfaceJointInstance>
-ext.ManualWeld = isA("ManualWeld") :: Boba<ManualWeld>
-ext.MarkerCurve = isA("MarkerCurve") :: Boba<MarkerCurve>
-ext.MarketplaceService = isA("MarketplaceService") :: Boba<MarketplaceService>
-ext.MatchmakingService = isA("MatchmakingService") :: Boba<MatchmakingService>
-ext.MaterialGenerationService = isA("MaterialGenerationService") :: Boba<MaterialGenerationService>
-ext.MaterialImportData = isA("MaterialImportData") :: Boba<MaterialImportData>
-ext.MaterialService = isA("MaterialService") :: Boba<MaterialService>
-ext.MaterialVariant = isA("MaterialVariant") :: Boba<MaterialVariant>
-ext.MemStorageConnection = isA("MemStorageConnection") :: Boba<MemStorageConnection>
-ext.MemStorageService = isA("MemStorageService") :: Boba<MemStorageService>
-ext.MemoryStoreHashMap = isA("MemoryStoreHashMap") :: Boba<MemoryStoreHashMap>
-ext.MemoryStoreHashMapPages = isA("MemoryStoreHashMapPages") :: Boba<MemoryStoreHashMapPages>
-ext.MemoryStoreQueue = isA("MemoryStoreQueue") :: Boba<MemoryStoreQueue>
-ext.MemoryStoreService = isA("MemoryStoreService") :: Boba<MemoryStoreService>
-ext.MemoryStoreSortedMap = isA("MemoryStoreSortedMap") :: Boba<MemoryStoreSortedMap>
-ext.MeshContentProvider = isA("MeshContentProvider") :: Boba<MeshContentProvider>
-ext.MeshImportData = isA("MeshImportData") :: Boba<MeshImportData>
-ext.MeshPart = isA("MeshPart") :: Boba<MeshPart>
-ext.Message = isA("Message") :: Boba<Message>
-ext.MessageBusConnection = isA("MessageBusConnection") :: Boba<MessageBusConnection>
-ext.MessageBusService = isA("MessageBusService") :: Boba<MessageBusService>
-ext.MessagingService = isA("MessagingService") :: Boba<MessagingService>
-ext.MetaBreakpoint = isA("MetaBreakpoint") :: Boba<MetaBreakpoint>
-ext.MetaBreakpointContext = isA("MetaBreakpointContext") :: Boba<MetaBreakpointContext>
-ext.MetaBreakpointManager = isA("MetaBreakpointManager") :: Boba<MetaBreakpointManager>
-ext.MicroProfilerService = isA("MicroProfilerService") :: Boba<MicroProfilerService>
-ext.Model = isA("Model") :: Boba<Model>
-ext.ModerationService = isA("ModerationService") :: Boba<ModerationService>
-ext.ModuleScript = isA("ModuleScript") :: Boba<ModuleScript>
-ext.Motor = isA("Motor") :: Boba<Motor>
-ext.Motor6D = isA("Motor6D") :: Boba<Motor6D>
-ext.MotorFeature = isA("MotorFeature") :: Boba<MotorFeature>
-ext.Mouse = isA("Mouse") :: Boba<Mouse>
-ext.MouseService = isA("MouseService") :: Boba<MouseService>
-ext.MultipleDocumentInterfaceInstance = isA("MultipleDocumentInterfaceInstance") :: Boba<MultipleDocumentInterfaceInstance>
-ext.NegateOperation = isA("NegateOperation") :: Boba<NegateOperation>
-ext.NetworkClient = isA("NetworkClient") :: Boba<NetworkClient>
-ext.NetworkReplicator = isA("NetworkReplicator") :: Boba<NetworkReplicator>
-ext.NetworkServer = isA("NetworkServer") :: Boba<NetworkServer>
-ext.NoCollisionConstraint = isA("NoCollisionConstraint") :: Boba<NoCollisionConstraint>
-ext.Noise = isA("Noise") :: Boba<Noise>
-ext.NonReplicatedCSGDictionaryService = isA("NonReplicatedCSGDictionaryService") :: Boba<NonReplicatedCSGDictionaryService>
-ext.NotificationService = isA("NotificationService") :: Boba<NotificationService>
-ext.NumberPose = isA("NumberPose") :: Boba<NumberPose>
-ext.NumberValue = isA("NumberValue") :: Boba<NumberValue>
-ext.Object = isA("Object") :: Boba<Object>
-ext.ObjectValue = isA("ObjectValue") :: Boba<ObjectValue>
-ext.OmniRecommendationsService = isA("OmniRecommendationsService") :: Boba<OmniRecommendationsService>
-ext.OpenCloudApiV1 = isA("OpenCloudApiV1") :: Boba<OpenCloudApiV1>
-ext.OpenCloudService = isA("OpenCloudService") :: Boba<OpenCloudService>
-ext.OperationGraph = isA("OperationGraph") :: Boba<OperationGraph>
-ext.OrderedDataStore = isA("OrderedDataStore") :: Boba<OrderedDataStore>
-ext.OutfitPages = isA("OutfitPages") :: Boba<OutfitPages>
-ext.PVAdornment = isA("PVAdornment") :: Boba<PVAdornment>
-ext.PackageService = isA("PackageService") :: Boba<PackageService>
-ext.PackageUIService = isA("PackageUIService") :: Boba<PackageUIService>
-ext.Pages = isA("Pages") :: Boba<Pages>
-ext.Pants = isA("Pants") :: Boba<Pants>
-ext.ParabolaAdornment = isA("ParabolaAdornment") :: Boba<ParabolaAdornment>
-ext.Part = isA("Part") :: Boba<Part>
-ext.PartAdornment = isA("PartAdornment") :: Boba<PartAdornment>
-ext.PartOperation = isA("PartOperation") :: Boba<PartOperation>
-ext.PartOperationAsset = isA("PartOperationAsset") :: Boba<PartOperationAsset>
-ext.ParticleEmitter = isA("ParticleEmitter") :: Boba<ParticleEmitter>
-ext.PartyEmulatorService = isA("PartyEmulatorService") :: Boba<PartyEmulatorService>
-ext.PatchBundlerFileWatch = isA("PatchBundlerFileWatch") :: Boba<PatchBundlerFileWatch>
-ext.PatchMapping = isA("PatchMapping") :: Boba<PatchMapping>
-ext.Path = isA("Path") :: Boba<Path>
-ext.Path2D = isA("Path2D") :: Boba<Path2D>
-ext.PathfindingLink = isA("PathfindingLink") :: Boba<PathfindingLink>
-ext.PathfindingModifier = isA("PathfindingModifier") :: Boba<PathfindingModifier>
-ext.PathfindingService = isA("PathfindingService") :: Boba<PathfindingService>
-ext.PausedState = isA("PausedState") :: Boba<PausedState>
-ext.PausedStateBreakpoint = isA("PausedStateBreakpoint") :: Boba<PausedStateBreakpoint>
-ext.PausedStateException = isA("PausedStateException") :: Boba<PausedStateException>
-ext.PerformanceControlService = isA("PerformanceControlService") :: Boba<PerformanceControlService>
-ext.PermissionsService = isA("PermissionsService") :: Boba<PermissionsService>
-ext.PhysicsService = isA("PhysicsService") :: Boba<PhysicsService>
-ext.PhysicsSettings = isA("PhysicsSettings") :: Boba<PhysicsSettings>
-ext.PitchShiftSoundEffect = isA("PitchShiftSoundEffect") :: Boba<PitchShiftSoundEffect>
-ext.PlaceAssetIdsService = isA("PlaceAssetIdsService") :: Boba<PlaceAssetIdsService>
-ext.PlaceStatsService = isA("PlaceStatsService") :: Boba<PlaceStatsService>
-ext.PlacesService = isA("PlacesService") :: Boba<PlacesService>
-ext.Plane = isA("Plane") :: Boba<Plane>
-ext.PlaneConstraint = isA("PlaneConstraint") :: Boba<PlaneConstraint>
-ext.Platform = isA("Platform") :: Boba<Platform>
-ext.PlatformCloudStorageService = isA("PlatformCloudStorageService") :: Boba<PlatformCloudStorageService>
-ext.PlatformFriendsService = isA("PlatformFriendsService") :: Boba<PlatformFriendsService>
-ext.Player = isA("Player") :: Boba<Player>
-ext.PlayerData = isA("PlayerData") :: Boba<PlayerData>
-ext.PlayerDataRecord = isA("PlayerDataRecord") :: Boba<PlayerDataRecord>
-ext.PlayerDataRecordConfig = isA("PlayerDataRecordConfig") :: Boba<PlayerDataRecordConfig>
-ext.PlayerDataService = isA("PlayerDataService") :: Boba<PlayerDataService>
-ext.PlayerEmulatorService = isA("PlayerEmulatorService") :: Boba<PlayerEmulatorService>
-ext.PlayerGui = isA("PlayerGui") :: Boba<PlayerGui>
-ext.PlayerHydrationService = isA("PlayerHydrationService") :: Boba<PlayerHydrationService>
-ext.PlayerMouse = isA("PlayerMouse") :: Boba<PlayerMouse>
-ext.PlayerScripts = isA("PlayerScripts") :: Boba<PlayerScripts>
-ext.PlayerViewService = isA("PlayerViewService") :: Boba<PlayerViewService>
-ext.Players = isA("Players") :: Boba<Players>
-ext.Plugin = isA("Plugin") :: Boba<Plugin>
-ext.PluginAction = isA("PluginAction") :: Boba<PluginAction>
-ext.PluginCapabilities = isA("PluginCapabilities") :: Boba<PluginCapabilities>
-ext.PluginDebugService = isA("PluginDebugService") :: Boba<PluginDebugService>
-ext.PluginDragEvent = isA("PluginDragEvent") :: Boba<PluginDragEvent>
-ext.PluginGui = isA("PluginGui") :: Boba<PluginGui>
-ext.PluginGuiService = isA("PluginGuiService") :: Boba<PluginGuiService>
-ext.PluginManagementService = isA("PluginManagementService") :: Boba<PluginManagementService>
-ext.PluginManager = isA("PluginManager") :: Boba<PluginManager>
-ext.PluginManagerInterface = isA("PluginManagerInterface") :: Boba<PluginManagerInterface>
-ext.PluginMenu = isA("PluginMenu") :: Boba<PluginMenu>
-ext.PluginMouse = isA("PluginMouse") :: Boba<PluginMouse>
-ext.PluginPolicyService = isA("PluginPolicyService") :: Boba<PluginPolicyService>
-ext.PluginToolbar = isA("PluginToolbar") :: Boba<PluginToolbar>
-ext.PluginToolbarButton = isA("PluginToolbarButton") :: Boba<PluginToolbarButton>
-ext.PointLight = isA("PointLight") :: Boba<PointLight>
-ext.PointsService = isA("PointsService") :: Boba<PointsService>
-ext.PolicyService = isA("PolicyService") :: Boba<PolicyService>
-ext.Pose = isA("Pose") :: Boba<Pose>
-ext.PoseBase = isA("PoseBase") :: Boba<PoseBase>
-ext.PostEffect = isA("PostEffect") :: Boba<PostEffect>
-ext.PrismaticConstraint = isA("PrismaticConstraint") :: Boba<PrismaticConstraint>
-ext.ProcessInstancePhysicsService = isA("ProcessInstancePhysicsService") :: Boba<ProcessInstancePhysicsService>
-ext.ProximityPrompt = isA("ProximityPrompt") :: Boba<ProximityPrompt>
-ext.PublishService = isA("PublishService") :: Boba<PublishService>
-ext.QWidgetPluginGui = isA("QWidgetPluginGui") :: Boba<QWidgetPluginGui>
-ext.RTAnimationTracker = isA("RTAnimationTracker") :: Boba<RTAnimationTracker>
-ext.RayValue = isA("RayValue") :: Boba<RayValue>
-ext.RbxAnalyticsService = isA("RbxAnalyticsService") :: Boba<RbxAnalyticsService>
-ext.RecommendationPages = isA("RecommendationPages") :: Boba<RecommendationPages>
-ext.RecommendationService = isA("RecommendationService") :: Boba<RecommendationService>
-ext.ReflectionMetadata = isA("ReflectionMetadata") :: Boba<ReflectionMetadata>
-ext.ReflectionMetadataCallbacks = isA("ReflectionMetadataCallbacks") :: Boba<ReflectionMetadataCallbacks>
-ext.ReflectionMetadataClass = isA("ReflectionMetadataClass") :: Boba<ReflectionMetadataClass>
-ext.ReflectionMetadataClasses = isA("ReflectionMetadataClasses") :: Boba<ReflectionMetadataClasses>
-ext.ReflectionMetadataEnum = isA("ReflectionMetadataEnum") :: Boba<ReflectionMetadataEnum>
-ext.ReflectionMetadataEnumItem = isA("ReflectionMetadataEnumItem") :: Boba<ReflectionMetadataEnumItem>
-ext.ReflectionMetadataEnums = isA("ReflectionMetadataEnums") :: Boba<ReflectionMetadataEnums>
-ext.ReflectionMetadataEvents = isA("ReflectionMetadataEvents") :: Boba<ReflectionMetadataEvents>
-ext.ReflectionMetadataFunctions = isA("ReflectionMetadataFunctions") :: Boba<ReflectionMetadataFunctions>
-ext.ReflectionMetadataItem = isA("ReflectionMetadataItem") :: Boba<ReflectionMetadataItem>
-ext.ReflectionMetadataMember = isA("ReflectionMetadataMember") :: Boba<ReflectionMetadataMember>
-ext.ReflectionMetadataProperties = isA("ReflectionMetadataProperties") :: Boba<ReflectionMetadataProperties>
-ext.ReflectionMetadataYieldFunctions = isA("ReflectionMetadataYieldFunctions") :: Boba<ReflectionMetadataYieldFunctions>
-ext.ReflectionService = isA("ReflectionService") :: Boba<ReflectionService>
-ext.RelativeGui = isA("RelativeGui") :: Boba<RelativeGui>
-ext.RemoteCommandService = isA("RemoteCommandService") :: Boba<RemoteCommandService>
-ext.RemoteCursorService = isA("RemoteCursorService") :: Boba<RemoteCursorService>
-ext.RemoteDebuggerServer = isA("RemoteDebuggerServer") :: Boba<RemoteDebuggerServer>
-ext.RemoteEvent = isA("RemoteEvent") :: Boba<RemoteEvent>
-ext.RemoteFunction = isA("RemoteFunction") :: Boba<RemoteFunction>
-ext.RenderingTest = isA("RenderingTest") :: Boba<RenderingTest>
-ext.ReplicatedFirst = isA("ReplicatedFirst") :: Boba<ReplicatedFirst>
-ext.ReplicatedStorage = isA("ReplicatedStorage") :: Boba<ReplicatedStorage>
-ext.ReverbSoundEffect = isA("ReverbSoundEffect") :: Boba<ReverbSoundEffect>
-ext.RibbonNotificationService = isA("RibbonNotificationService") :: Boba<RibbonNotificationService>
-ext.RigidConstraint = isA("RigidConstraint") :: Boba<RigidConstraint>
-ext.RobloxPluginGuiService = isA("RobloxPluginGuiService") :: Boba<RobloxPluginGuiService>
-ext.RobloxSerializableInstance = isA("RobloxSerializableInstance") :: Boba<RobloxSerializableInstance>
-ext.RobloxServerStorage = isA("RobloxServerStorage") :: Boba<RobloxServerStorage>
-ext.RocketPropulsion = isA("RocketPropulsion") :: Boba<RocketPropulsion>
-ext.RodConstraint = isA("RodConstraint") :: Boba<RodConstraint>
-ext.RomarkRbxAnalyticsService = isA("RomarkRbxAnalyticsService") :: Boba<RomarkRbxAnalyticsService>
-ext.RomarkService = isA("RomarkService") :: Boba<RomarkService>
-ext.RootImportData = isA("RootImportData") :: Boba<RootImportData>
-ext.RopeConstraint = isA("RopeConstraint") :: Boba<RopeConstraint>
-ext.Rotate = isA("Rotate") :: Boba<Rotate>
-ext.RotateP = isA("RotateP") :: Boba<RotateP>
-ext.RotateV = isA("RotateV") :: Boba<RotateV>
-ext.RotationCurve = isA("RotationCurve") :: Boba<RotationCurve>
-ext.RtMessagingService = isA("RtMessagingService") :: Boba<RtMessagingService>
-ext.RunService = isA("RunService") :: Boba<RunService>
-ext.RunningAverageItemDouble = isA("RunningAverageItemDouble") :: Boba<RunningAverageItemDouble>
-ext.RunningAverageItemInt = isA("RunningAverageItemInt") :: Boba<RunningAverageItemInt>
-ext.RunningAverageTimeIntervalItem = isA("RunningAverageTimeIntervalItem") :: Boba<RunningAverageTimeIntervalItem>
-ext.RuntimeContentService = isA("RuntimeContentService") :: Boba<RuntimeContentService>
-ext.RuntimeScriptService = isA("RuntimeScriptService") :: Boba<RuntimeScriptService>
-ext.SafetyService = isA("SafetyService") :: Boba<SafetyService>
-ext.ScreenGui = isA("ScreenGui") :: Boba<ScreenGui>
-ext.ScreenshotCapture = isA("ScreenshotCapture") :: Boba<ScreenshotCapture>
-ext.ScreenshotHud = isA("ScreenshotHud") :: Boba<ScreenshotHud>
-ext.Script = isA("Script") :: Boba<Script>
-ext.ScriptBuilder = isA("ScriptBuilder") :: Boba<ScriptBuilder>
-ext.ScriptChangeService = isA("ScriptChangeService") :: Boba<ScriptChangeService>
-ext.ScriptCloneWatcher = isA("ScriptCloneWatcher") :: Boba<ScriptCloneWatcher>
-ext.ScriptCloneWatcherHelper = isA("ScriptCloneWatcherHelper") :: Boba<ScriptCloneWatcherHelper>
-ext.ScriptCommitService = isA("ScriptCommitService") :: Boba<ScriptCommitService>
-ext.ScriptContext = isA("ScriptContext") :: Boba<ScriptContext>
-ext.ScriptDebugger = isA("ScriptDebugger") :: Boba<ScriptDebugger>
-ext.ScriptDocument = isA("ScriptDocument") :: Boba<ScriptDocument>
-ext.ScriptEditorService = isA("ScriptEditorService") :: Boba<ScriptEditorService>
-ext.ScriptProfilerService = isA("ScriptProfilerService") :: Boba<ScriptProfilerService>
-ext.ScriptRegistrationService = isA("ScriptRegistrationService") :: Boba<ScriptRegistrationService>
-ext.ScriptRuntime = isA("ScriptRuntime") :: Boba<ScriptRuntime>
-ext.ScriptService = isA("ScriptService") :: Boba<ScriptService>
-ext.ScrollingFrame = isA("ScrollingFrame") :: Boba<ScrollingFrame>
-ext.Seat = isA("Seat") :: Boba<Seat>
-ext.Selection = isA("Selection") :: Boba<Selection>
-ext.SelectionBox = isA("SelectionBox") :: Boba<SelectionBox>
-ext.SelectionHighlightManager = isA("SelectionHighlightManager") :: Boba<SelectionHighlightManager>
-ext.SelectionLasso = isA("SelectionLasso") :: Boba<SelectionLasso>
-ext.SelectionPartLasso = isA("SelectionPartLasso") :: Boba<SelectionPartLasso>
-ext.SelectionPointLasso = isA("SelectionPointLasso") :: Boba<SelectionPointLasso>
-ext.SelectionSphere = isA("SelectionSphere") :: Boba<SelectionSphere>
-ext.SensorBase = isA("SensorBase") :: Boba<SensorBase>
-ext.SerializationService = isA("SerializationService") :: Boba<SerializationService>
-ext.ServerReplicator = isA("ServerReplicator") :: Boba<ServerReplicator>
-ext.ServerScriptService = isA("ServerScriptService") :: Boba<ServerScriptService>
-ext.ServerStorage = isA("ServerStorage") :: Boba<ServerStorage>
-ext.ServiceVisibilityService = isA("ServiceVisibilityService") :: Boba<ServiceVisibilityService>
-ext.SessionCheckService = isA("SessionCheckService") :: Boba<SessionCheckService>
-ext.SessionService = isA("SessionService") :: Boba<SessionService>
-ext.SharedTableRegistry = isA("SharedTableRegistry") :: Boba<SharedTableRegistry>
-ext.Shirt = isA("Shirt") :: Boba<Shirt>
-ext.ShirtGraphic = isA("ShirtGraphic") :: Boba<ShirtGraphic>
-ext.SkateboardController = isA("SkateboardController") :: Boba<SkateboardController>
-ext.SkateboardPlatform = isA("SkateboardPlatform") :: Boba<SkateboardPlatform>
-ext.Skin = isA("Skin") :: Boba<Skin>
-ext.Sky = isA("Sky") :: Boba<Sky>
-ext.SlidingBallConstraint = isA("SlidingBallConstraint") :: Boba<SlidingBallConstraint>
-ext.SlimContentProvider = isA("SlimContentProvider") :: Boba<SlimContentProvider>
-ext.SlimService = isA("SlimService") :: Boba<SlimService>
-ext.Smoke = isA("Smoke") :: Boba<Smoke>
-ext.SmoothVoxelsUpgraderService = isA("SmoothVoxelsUpgraderService") :: Boba<SmoothVoxelsUpgraderService>
-ext.Snap = isA("Snap") :: Boba<Snap>
-ext.SnippetService = isA("SnippetService") :: Boba<SnippetService>
-ext.SocialService = isA("SocialService") :: Boba<SocialService>
-ext.SolidModelContentProvider = isA("SolidModelContentProvider") :: Boba<SolidModelContentProvider>
-ext.Sound = isA("Sound") :: Boba<Sound>
-ext.SoundEffect = isA("SoundEffect") :: Boba<SoundEffect>
-ext.SoundGroup = isA("SoundGroup") :: Boba<SoundGroup>
-ext.SoundService = isA("SoundService") :: Boba<SoundService>
-ext.SoundShimService = isA("SoundShimService") :: Boba<SoundShimService>
-ext.Sparkles = isA("Sparkles") :: Boba<Sparkles>
-ext.SpawnLocation = isA("SpawnLocation") :: Boba<SpawnLocation>
-ext.SpawnerService = isA("SpawnerService") :: Boba<SpawnerService>
-ext.SpecialMesh = isA("SpecialMesh") :: Boba<SpecialMesh>
-ext.SphereHandleAdornment = isA("SphereHandleAdornment") :: Boba<SphereHandleAdornment>
-ext.SpotLight = isA("SpotLight") :: Boba<SpotLight>
-ext.SpringConstraint = isA("SpringConstraint") :: Boba<SpringConstraint>
-ext.StackFrame = isA("StackFrame") :: Boba<StackFrame>
-ext.StandalonePluginScripts = isA("StandalonePluginScripts") :: Boba<StandalonePluginScripts>
-ext.StandardPages = isA("StandardPages") :: Boba<StandardPages>
-ext.StartPageService = isA("StartPageService") :: Boba<StartPageService>
-ext.StarterCharacterScripts = isA("StarterCharacterScripts") :: Boba<StarterCharacterScripts>
-ext.StarterGear = isA("StarterGear") :: Boba<StarterGear>
-ext.StarterGui = isA("StarterGui") :: Boba<StarterGui>
-ext.StarterPack = isA("StarterPack") :: Boba<StarterPack>
-ext.StarterPlayer = isA("StarterPlayer") :: Boba<StarterPlayer>
-ext.StarterPlayerScripts = isA("StarterPlayerScripts") :: Boba<StarterPlayerScripts>
-ext.StartupMessageService = isA("StartupMessageService") :: Boba<StartupMessageService>
-ext.Stats = isA("Stats") :: Boba<Stats>
-ext.StatsItem = isA("StatsItem") :: Boba<StatsItem>
-ext.Status = isA("Status") :: Boba<Status>
-ext.StopWatchReporter = isA("StopWatchReporter") :: Boba<StopWatchReporter>
-ext.StreamingService = isA("StreamingService") :: Boba<StreamingService>
-ext.StringValue = isA("StringValue") :: Boba<StringValue>
-ext.Studio = isA("Studio") :: Boba<Studio>
-ext.StudioAssetService = isA("StudioAssetService") :: Boba<StudioAssetService>
-ext.StudioAttachment = isA("StudioAttachment") :: Boba<StudioAttachment>
-ext.StudioCallout = isA("StudioCallout") :: Boba<StudioCallout>
-ext.StudioCameraService = isA("StudioCameraService") :: Boba<StudioCameraService>
-ext.StudioData = isA("StudioData") :: Boba<StudioData>
-ext.StudioDeviceEmulatorService = isA("StudioDeviceEmulatorService") :: Boba<StudioDeviceEmulatorService>
-ext.StudioObjectBase = isA("StudioObjectBase") :: Boba<StudioObjectBase>
-ext.StudioPublishService = isA("StudioPublishService") :: Boba<StudioPublishService>
-ext.StudioScriptDebugEventListener = isA("StudioScriptDebugEventListener") :: Boba<StudioScriptDebugEventListener>
-ext.StudioSdkService = isA("StudioSdkService") :: Boba<StudioSdkService>
-ext.StudioService = isA("StudioService") :: Boba<StudioService>
-ext.StudioTheme = isA("StudioTheme") :: Boba<StudioTheme>
-ext.StudioUserService = isA("StudioUserService") :: Boba<StudioUserService>
-ext.StudioWidget = isA("StudioWidget") :: Boba<StudioWidget>
-ext.StudioWidgetsService = isA("StudioWidgetsService") :: Boba<StudioWidgetsService>
-ext.StyleBase = isA("StyleBase") :: Boba<StyleBase>
-ext.StyleDerive = isA("StyleDerive") :: Boba<StyleDerive>
-ext.StyleLink = isA("StyleLink") :: Boba<StyleLink>
-ext.StyleRule = isA("StyleRule") :: Boba<StyleRule>
-ext.StyleSheet = isA("StyleSheet") :: Boba<StyleSheet>
-ext.StylingService = isA("StylingService") :: Boba<StylingService>
-ext.SunRaysEffect = isA("SunRaysEffect") :: Boba<SunRaysEffect>
-ext.SurfaceAppearance = isA("SurfaceAppearance") :: Boba<SurfaceAppearance>
-ext.SurfaceGui = isA("SurfaceGui") :: Boba<SurfaceGui>
-ext.SurfaceGuiBase = isA("SurfaceGuiBase") :: Boba<SurfaceGuiBase>
-ext.SurfaceLight = isA("SurfaceLight") :: Boba<SurfaceLight>
-ext.SurfaceSelection = isA("SurfaceSelection") :: Boba<SurfaceSelection>
-ext.SwimController = isA("SwimController") :: Boba<SwimController>
-ext.SyncScriptBuilder = isA("SyncScriptBuilder") :: Boba<SyncScriptBuilder>
-ext.SystemThemeService = isA("SystemThemeService") :: Boba<SystemThemeService>
-ext.TaskScheduler = isA("TaskScheduler") :: Boba<TaskScheduler>
-ext.Team = isA("Team") :: Boba<Team>
-ext.TeamCreateData = isA("TeamCreateData") :: Boba<TeamCreateData>
-ext.TeamCreatePublishService = isA("TeamCreatePublishService") :: Boba<TeamCreatePublishService>
-ext.TeamCreateService = isA("TeamCreateService") :: Boba<TeamCreateService>
-ext.Teams = isA("Teams") :: Boba<Teams>
-ext.TelemetryService = isA("TelemetryService") :: Boba<TelemetryService>
-ext.TeleportAsyncResult = isA("TeleportAsyncResult") :: Boba<TeleportAsyncResult>
-ext.TeleportOptions = isA("TeleportOptions") :: Boba<TeleportOptions>
-ext.TeleportService = isA("TeleportService") :: Boba<TeleportService>
-ext.TemporaryCageMeshProvider = isA("TemporaryCageMeshProvider") :: Boba<TemporaryCageMeshProvider>
-ext.TemporaryScriptService = isA("TemporaryScriptService") :: Boba<TemporaryScriptService>
-ext.Terrain = isA("Terrain") :: Boba<Terrain>
-ext.TerrainDetail = isA("TerrainDetail") :: Boba<TerrainDetail>
-ext.TerrainIterateOperation = isA("TerrainIterateOperation") :: Boba<TerrainIterateOperation>
-ext.TerrainModifyOperation = isA("TerrainModifyOperation") :: Boba<TerrainModifyOperation>
-ext.TerrainReadOperation = isA("TerrainReadOperation") :: Boba<TerrainReadOperation>
-ext.TerrainRegion = isA("TerrainRegion") :: Boba<TerrainRegion>
-ext.TerrainWriteOperation = isA("TerrainWriteOperation") :: Boba<TerrainWriteOperation>
-ext.TestService = isA("TestService") :: Boba<TestService>
-ext.TextBox = isA("TextBox") :: Boba<TextBox>
-ext.TextBoxService = isA("TextBoxService") :: Boba<TextBoxService>
-ext.TextButton = isA("TextButton") :: Boba<TextButton>
-ext.TextChannel = isA("TextChannel") :: Boba<TextChannel>
-ext.TextChatCommand = isA("TextChatCommand") :: Boba<TextChatCommand>
-ext.TextChatConfigurations = isA("TextChatConfigurations") :: Boba<TextChatConfigurations>
-ext.TextChatMessage = isA("TextChatMessage") :: Boba<TextChatMessage>
-ext.TextChatMessageProperties = isA("TextChatMessageProperties") :: Boba<TextChatMessageProperties>
-ext.TextChatService = isA("TextChatService") :: Boba<TextChatService>
-ext.TextFilterResult = isA("TextFilterResult") :: Boba<TextFilterResult>
-ext.TextFilterTranslatedResult = isA("TextFilterTranslatedResult") :: Boba<TextFilterTranslatedResult>
-ext.TextGenerator = isA("TextGenerator") :: Boba<TextGenerator>
-ext.TextLabel = isA("TextLabel") :: Boba<TextLabel>
-ext.TextService = isA("TextService") :: Boba<TextService>
-ext.TextSource = isA("TextSource") :: Boba<TextSource>
-ext.Texture = isA("Texture") :: Boba<Texture>
-ext.TextureGenerationPartGroup = isA("TextureGenerationPartGroup") :: Boba<TextureGenerationPartGroup>
-ext.TextureGenerationService = isA("TextureGenerationService") :: Boba<TextureGenerationService>
-ext.TextureGenerationUnwrappingRequest = isA("TextureGenerationUnwrappingRequest") :: Boba<TextureGenerationUnwrappingRequest>
-ext.ThirdPartyUserService = isA("ThirdPartyUserService") :: Boba<ThirdPartyUserService>
-ext.ThreadState = isA("ThreadState") :: Boba<ThreadState>
-ext.TimerService = isA("TimerService") :: Boba<TimerService>
-ext.ToastNotificationService = isA("ToastNotificationService") :: Boba<ToastNotificationService>
-ext.Tool = isA("Tool") :: Boba<Tool>
-ext.Torque = isA("Torque") :: Boba<Torque>
-ext.TorsionSpringConstraint = isA("TorsionSpringConstraint") :: Boba<TorsionSpringConstraint>
-ext.TotalCountTimeIntervalItem = isA("TotalCountTimeIntervalItem") :: Boba<TotalCountTimeIntervalItem>
-ext.TouchInputService = isA("TouchInputService") :: Boba<TouchInputService>
-ext.TracerService = isA("TracerService") :: Boba<TracerService>
-ext.TrackerLodController = isA("TrackerLodController") :: Boba<TrackerLodController>
-ext.TrackerStreamAnimation = isA("TrackerStreamAnimation") :: Boba<TrackerStreamAnimation>
-ext.Trail = isA("Trail") :: Boba<Trail>
-ext.Translator = isA("Translator") :: Boba<Translator>
-ext.TremoloSoundEffect = isA("TremoloSoundEffect") :: Boba<TremoloSoundEffect>
-ext.TriangleMeshPart = isA("TriangleMeshPart") :: Boba<TriangleMeshPart>
-ext.TrussPart = isA("TrussPart") :: Boba<TrussPart>
-ext.TutorialService = isA("TutorialService") :: Boba<TutorialService>
-ext.Tween = isA("Tween") :: Boba<Tween>
-ext.TweenService = isA("TweenService") :: Boba<TweenService>
-ext.UGCAvatarService = isA("UGCAvatarService") :: Boba<UGCAvatarService>
-ext.UGCValidationService = isA("UGCValidationService") :: Boba<UGCValidationService>
-ext.UIAspectRatioConstraint = isA("UIAspectRatioConstraint") :: Boba<UIAspectRatioConstraint>
-ext.UIBase = isA("UIBase") :: Boba<UIBase>
-ext.UIComponent = isA("UIComponent") :: Boba<UIComponent>
-ext.UIConstraint = isA("UIConstraint") :: Boba<UIConstraint>
-ext.UICorner = isA("UICorner") :: Boba<UICorner>
-ext.UIDragDetector = isA("UIDragDetector") :: Boba<UIDragDetector>
-ext.UIDragDetectorService = isA("UIDragDetectorService") :: Boba<UIDragDetectorService>
-ext.UIFlexItem = isA("UIFlexItem") :: Boba<UIFlexItem>
-ext.UIGradient = isA("UIGradient") :: Boba<UIGradient>
-ext.UIGridLayout = isA("UIGridLayout") :: Boba<UIGridLayout>
-ext.UILayout = isA("UILayout") :: Boba<UILayout>
-ext.UIListLayout = isA("UIListLayout") :: Boba<UIListLayout>
-ext.UIPadding = isA("UIPadding") :: Boba<UIPadding>
-ext.UIPageLayout = isA("UIPageLayout") :: Boba<UIPageLayout>
-ext.UIScale = isA("UIScale") :: Boba<UIScale>
-ext.UISizeConstraint = isA("UISizeConstraint") :: Boba<UISizeConstraint>
-ext.UIStroke = isA("UIStroke") :: Boba<UIStroke>
-ext.UITableLayout = isA("UITableLayout") :: Boba<UITableLayout>
-ext.UITextSizeConstraint = isA("UITextSizeConstraint") :: Boba<UITextSizeConstraint>
-ext.UnionOperation = isA("UnionOperation") :: Boba<UnionOperation>
-ext.UniqueIdLookupService = isA("UniqueIdLookupService") :: Boba<UniqueIdLookupService>
-ext.UniversalConstraint = isA("UniversalConstraint") :: Boba<UniversalConstraint>
-ext.UnreliableRemoteEvent = isA("UnreliableRemoteEvent") :: Boba<UnreliableRemoteEvent>
-ext.UnvalidatedAssetService = isA("UnvalidatedAssetService") :: Boba<UnvalidatedAssetService>
-ext.UserGameSettings = isA("UserGameSettings") :: Boba<UserGameSettings>
-ext.UserInputService = isA("UserInputService") :: Boba<UserInputService>
-ext.UserService = isA("UserService") :: Boba<UserService>
-ext.UserSettings = isA("UserSettings") :: Boba<UserSettings>
-ext.UserStorageService = isA("UserStorageService") :: Boba<UserStorageService>
-ext.VRService = isA("VRService") :: Boba<VRService>
-ext.VRStatusService = isA("VRStatusService") :: Boba<VRStatusService>
-ext.ValueBase = isA("ValueBase") :: Boba<ValueBase>
-ext.Vector3Curve = isA("Vector3Curve") :: Boba<Vector3Curve>
-ext.Vector3Value = isA("Vector3Value") :: Boba<Vector3Value>
-ext.VectorForce = isA("VectorForce") :: Boba<VectorForce>
-ext.VehicleController = isA("VehicleController") :: Boba<VehicleController>
-ext.VehicleSeat = isA("VehicleSeat") :: Boba<VehicleSeat>
-ext.VelocityMotor = isA("VelocityMotor") :: Boba<VelocityMotor>
-ext.VersionControlService = isA("VersionControlService") :: Boba<VersionControlService>
-ext.VideoCapture = isA("VideoCapture") :: Boba<VideoCapture>
-ext.VideoCaptureService = isA("VideoCaptureService") :: Boba<VideoCaptureService>
-ext.VideoDeviceInput = isA("VideoDeviceInput") :: Boba<VideoDeviceInput>
-ext.VideoFrame = isA("VideoFrame") :: Boba<VideoFrame>
-ext.VideoService = isA("VideoService") :: Boba<VideoService>
-ext.ViewportFrame = isA("ViewportFrame") :: Boba<ViewportFrame>
-ext.VirtualInputManager = isA("VirtualInputManager") :: Boba<VirtualInputManager>
-ext.VirtualUser = isA("VirtualUser") :: Boba<VirtualUser>
-ext.VisibilityCheckDispatcher = isA("VisibilityCheckDispatcher") :: Boba<VisibilityCheckDispatcher>
-ext.Visit = isA("Visit") :: Boba<Visit>
-ext.VisualizationMode = isA("VisualizationMode") :: Boba<VisualizationMode>
-ext.VisualizationModeCategory = isA("VisualizationModeCategory") :: Boba<VisualizationModeCategory>
-ext.VisualizationModeService = isA("VisualizationModeService") :: Boba<VisualizationModeService>
-ext.VoiceChatService = isA("VoiceChatService") :: Boba<VoiceChatService>
-ext.WebSocketClient = isA("WebSocketClient") :: Boba<WebSocketClient>
-ext.WebSocketService = isA("WebSocketService") :: Boba<WebSocketService>
-ext.WebStreamClient = isA("WebStreamClient") :: Boba<WebStreamClient>
-ext.WebViewService = isA("WebViewService") :: Boba<WebViewService>
-ext.WedgePart = isA("WedgePart") :: Boba<WedgePart>
-ext.Weld = isA("Weld") :: Boba<Weld>
-ext.WeldConstraint = isA("WeldConstraint") :: Boba<WeldConstraint>
-ext.Wire = isA("Wire") :: Boba<Wire>
-ext.WireframeHandleAdornment = isA("WireframeHandleAdornment") :: Boba<WireframeHandleAdornment>
-ext.Workspace = isA("Workspace") :: Boba<Workspace>
-ext.WorkspaceAnnotation = isA("WorkspaceAnnotation") :: Boba<WorkspaceAnnotation>
-ext.WorldModel = isA("WorldModel") :: Boba<WorldModel>
-ext.WorldRoot = isA("WorldRoot") :: Boba<WorldRoot>
-ext.WrapDeformer = isA("WrapDeformer") :: Boba<WrapDeformer>
-ext.WrapLayer = isA("WrapLayer") :: Boba<WrapLayer>
+-- boba: end roblox data types codegen
 
 local Roblox: typeof(Boba) & typeof(ext) = {} :: any
 for _, exports in { Boba, ext } :: { any } do
@@ -892,6 +924,8 @@ for _, exports in { Boba, ext } :: { any } do
 	end
 end
 
+table.clear(ext)
+ext = nil :: any
+
 table.freeze(Roblox)
 return Roblox
--- stylua: ignore end

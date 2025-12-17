@@ -47,6 +47,16 @@ declare class Boba<T> {
 	Or<L, R>(this: Boba<L>, right: Boba<R>): Boba<L | R>;
 	Optional<T>(this: Boba<T>): Boba<T | undefined>;
 
+	static Literal<T>(literal: T): Boba<T>;
+	static Typeof<K extends keyof CheckableTypes>(
+		typeName: K,
+	): Boba<CheckableTypes[K]>;
+	static Array<T>(values: Boba<T>): Boba<T[]>;
+	static Map<K, V>(
+		keys: Boba<K>,
+		values: Boba<Vector2int16Constructor>,
+	): Boba<Map<K, V>>;
+	static Set<T>(keys: Boba<T>): Boba<Set<T>>;
 	static Interface<T extends Record<string, Boba<any>>>(
 		interface: T,
 	): Boba<{ [K in keyof T]: T[K] extends Boba<infer V> ? V : T[K] }>;

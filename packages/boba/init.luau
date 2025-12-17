@@ -24,9 +24,6 @@
 
 ]]
 
---[=[
-	@class Boba
-]=]
 local Boba = {}
 Boba.__index = Boba
 
@@ -48,21 +45,22 @@ export type BobaInner<T> = {
 	]=]
 	error: string,
 	--[=[
-		@prop check
+		@prop match
 		@within Boba<T>
 		@since 1.0.0
 
 		Given an unknown value, returns `true` if the Boba matches it's
 		type. Otherwise, returns `false` and an3 error message.
 	]=]
-	check: (self: Boba<T>, x: unknown) -> (boolean, string?),
+	match: (self: Boba<T>, x: unknown) -> (boolean, string?),
 	--[=[
 		@prop inner
 		@within Boba<T>
 		@since 1.0.0
 
 		Represents the `T` type parameter. At runtime, this references
-		itself.
+		itself. This is most useful for building interfaces and fetching the
+		static `T` type.
 
 		@example
 
@@ -89,11 +87,16 @@ export type BobaInner<T> = {
 ]=]
 export type Boba<T> = typeof(setmetatable({} :: BobaInner<T>, Boba))
 
-function Boba.new<T>(expected: string, check: (self: Boba<T>, x: unknown) -> boolean): Boba<T>
+--[=[
+	@function new
+
+
+]=]
+function Boba.new<T>(expected: string, match: (self: Boba<T>, x: unknown) -> boolean): Boba<T>
 	local self = setmetatable({
 		expected = expected,
 		error = `expected type {expected}`,
-		check = check,
+		match = match,
 	}, Boba)
 	self.inner = self :: any
 	return self
@@ -106,7 +109,7 @@ end
 -- FIXME: Luau types are bad </3
 -- function boba.__call<T>(self: Type<T>, x: any)
 function Boba.__call(self: any, x: any): (boolean, string?)
-	return self:check(x)
+	return self:match(x)
 end
 
 function Boba.__tostring(self: Boba<any>)
@@ -114,16 +117,16 @@ function Boba.__tostring(self: Boba<any>)
 end
 
 function Boba.cast<T>(self: Boba<T>, x: any): T?
-	return if self:check(x) then x else nil
+	return if self:match(x) then x else nil
 end
 
 function Boba.assert<T>(self: Boba<T>, x: any): T
-	local checkType, typeError = self:check(x)
-	return if checkType then x else error(typeError)
+	local matchType, typeError = self:match(x)
+	return if matchType then x else error(typeError)
 end
 
 function Boba.Nickname<T>(self: Boba<T>, name: string): Boba<T>
-	return Boba.new(name, self.check)
+	return Boba.new(name, self.match)
 end
 
 function Boba.Retype<T>(self: Boba<any>): Boba<T>
@@ -136,9 +139,9 @@ end
 
 function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
 	return Boba.new(`({left.expected}) & ({right.expected})`, function(self, x)
-		local isLeft, leftError = left:check(x)
+		local isLeft, leftError = left:match(x)
 		if not isLeft then
-			local isRight, rightError = right:check(x)
+			local isRight, rightError = right:match(x)
 			if isRight then
 				return true
 			end
@@ -150,8 +153,8 @@ end
 
 function Boba.Or<L, R>(left: Boba<L>, right: Boba<R>): Boba<L | R>
 	return Boba.new(`{left.expected} | {right.expected}`, function(self, x)
-		local isLeft, leftError = left:check(x)
-		local isRight, rightError = right:check(x)
+		local isLeft, leftError = left:match(x)
+		local isRight, rightError = right:match(x)
 		if isLeft or isRight then
 			return true
 		end
@@ -164,7 +167,24 @@ function Boba.Optional<T>(inner: Boba<T>): Boba<T?>
 		if x == nil then
 			return true
 		end
-		return inner:check(x)
+		return inner:match(x)
+	end)
+end
+
+function Boba.Predicate<T>(inner: Boba<T>, predicate: (value: T) -> (boolean, string?)): Boba<T>
+	return Boba.new(`Predicate<{inner.expected}>`, function(self, x: any): boolean
+		local matches, matchError = inner:match(x)
+
+		if matches then
+			local passes, predicateError = predicate(x)
+			if passes then
+				return true
+			end
+
+			return false, self:because(predicateError or "value did not sastify the predicate")
+		end
+
+		return false, matchError
 	end)
 end
 
@@ -199,7 +219,7 @@ function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
 				return false, self:because(`because there's non-numeric indexes, such as key {tostring(key)}`)
 			end
 
-			local isValue, valueError = values:check(value)
+			local isValue, valueError = values:match(value)
 			if not isValue then
 				return false, self:because(`at index #{key}: {valueError}`)
 			end
@@ -216,12 +236,12 @@ function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
 		end
 
 		for key, value in pairs(x) do
-			local isKey, keyError = keys:check(value)
+			local isKey, keyError = keys:match(value)
 			if not isKey then
 				return false, self:because(`got unexpected key {key}: {keyError}`)
 			end
 
-			local isValue, valueError = values:check(value)
+			local isValue, valueError = values:match(value)
 			if not isValue then
 				return false, self:because(`at key {key}: {valueError}`)
 			end
@@ -238,7 +258,7 @@ function Boba.Set<K>(keys: Boba<K>): Boba<{ [K]: true }>
 		end
 
 		for key, value in pairs(x) do
-			local isKey, keyError = keys:check(value)
+			local isKey, keyError = keys:match(value)
 			if not isKey then
 				return false, self:because(`got unexpected key {key}: {keyError}`)
 			end
@@ -266,7 +286,7 @@ function Boba.Interface<T>(interface: T & { [string]: Boba<any> }): Boba<T>
 
 		for key, valueType in pairs(interface) do
 			local value = x[key]
-			local isValue, valueError = valueType:check(value)
+			local isValue, valueError = valueType:match(value)
 			if not isValue then
 				return false,
 					self:because(
@@ -293,7 +313,7 @@ function Boba.ExhaustiveInterface<T>(interface: T): Boba<T>
 
 		for key, valueType in pairs(interface :: any) do
 			local value = x[key]
-			local isValue, valueError = valueType:check(value)
+			local isValue, valueError = valueType:match(value)
 			if not isValue then
 				return false,
 					self:because(
