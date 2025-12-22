@@ -2,7 +2,7 @@ local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
 local CommentRegion = require("@lib/comment-region")
 
-local PATH = "./packages/boba-roblox/init.luau"
+local PATH = "./packages/boba-roblox/src/init.luau"
 
 local REGION_DATA_TYPES = CommentRegion.new("roblox data types codegen")
 local REGION_INSTANCES = CommentRegion.new("roblox instances typegen")
@@ -79,7 +79,7 @@ local function renderRegionInstances()
 
 	local lines = { "type Instances = {" }
 	for _, className in classes do
-		if not (EXCLUDED_CLASSES[className] or table.find(assert(db:GetClass(className)).Tags, "NotBrowsable")) then
+		if not EXCLUDED_CLASSES[className] then
 			table.insert(lines, `\t{className}: Boba<{className}>,`)
 		end
 	end

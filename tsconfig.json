@@ -13,6 +13,9 @@
 		"rootDir": ".",
 		"incremental": true,
 		"experimentalDecorators": true,
-		"typeRoots": ["node_modules/@rbxts"]
+		"typeRoots": ["node_modules/@rbxts"],
+		"paths": {
+			"@rbxts/boba": ["./packages/boba"]
+		}
 	}
 }

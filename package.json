@@ -1,9 +1,11 @@
 {
 	"name": "boba",
 	"private": true,
+	"version": "0.0.0",
 	"devDependencies": {
 		"@rbxts/compiler-types": "^3.0.0-types.0",
-		"@rbxts/types": "^1.0.896"
+		"@rbxts/types": "^1.0.896",
+		"prettier": "^3.7.4"
 	},
 	"peerDependencies": {
 		"typescript": "^5"

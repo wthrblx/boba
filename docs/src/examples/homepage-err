@@ -1,0 +1,12 @@
+expected { damage: DamageAmount, interval: number }
+> value at key "damage" (string)
+  expected DamageAmount
+  > did not match any of: number | Lethal, nil
+    expected nil
+    > only nil is accepted, but got "Deadly" (string)
+    expected number | Lethal
+    > did not match any of: number, Lethal
+      expected Lethal
+      > only Lethal is accepted, but got "Deadly" (string)
+      expected number
+      > got "Deadly" (string)

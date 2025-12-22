@@ -1,0 +1,10 @@
+{
+	"name": "rbxts-boba",
+	"globIgnorePaths": ["packages/*/node_modules"],
+	"tree": {
+		"$className": "Folder",
+		"@rbxts": {
+			"$path": "packages"
+		}
+	}
+}

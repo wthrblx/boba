@@ -1,0 +1,38 @@
+---
+title: Boba
+head:
+  - tag: title
+    content: Boba - Best-of-all-worlds runtime typechecker for Luau
+description: Boba is a best-of-all-worlds runtime typechecker for Luau.
+template: splash
+hero:
+  title: ""
+  tagline:
+    Boba is a best-of-all-worlds runtime typechecker for Luau.
+  image:
+    alt: Boba
+    dark: /src/assets/logo-dark.svg
+    light: /src/assets/logo-light.svg
+  actions:
+    - text: Guides
+      link: /guides/what-is-boba
+      icon: rocket
+      variant: primary
+    - text: API Reference
+      link: /api-reference/
+      icon: open-book
+      variant: secondary
+    - text: Source Code
+      link: https://github.com/wthrblx/boba/
+      icon: github
+      variant: secondary
+---
+
+import { Code } from '@astrojs/starlight/components';
+import exampleCode from '/src/examples/homepage?raw';
+import exampleErr from '/src/examples/homepage-err?raw';
+
+<section class="boba-example">
+	<Code code={exampleCode} lang="luau" />
+	<Code code={exampleErr} />
+</section>

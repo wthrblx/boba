@@ -21,23 +21,25 @@
 
 */
 
-type CheckResult = LuaTuple<[matches: true] | [matches: false, error: string]>;
+export class Result {
+	static ok: Result;
+	fail(expectedType: string, message: string, children?: Result[]): Result;
+	because(sub: Result): Result;
+	format(): string;
+}
+
+export function quote(x: any): string;
+export function quoteGot(x: any): string;
 
 export class Boba<T> {
-	constructor(
-		expected: string,
-		check: (self: Boba<T>, x: unknown) => CheckResult,
-	);
+	constructor(expectedType: string, check: (self: Boba<T>, x: unknown) => Result);
 
+	readonly expectedType: string;
 	readonly inner: T;
-	readonly expected: string;
-	readonly error: string;
 
-	check(x: unknown): x is T;
-	check(x: unknown): CheckResult;
-	check(x: unknown): CheckResult;
+	isMatch(x: unknown): x is T;
+	matches(x: unknown): Result;
 	cast(x: unknown): T | undefined;
-	assert(x: unknown): asserts x is T;
 	assert(x: unknown): T;
 
 	Nickname(nickname: string): this;
@@ -46,16 +48,12 @@ export class Boba<T> {
 	And<L, R>(this: Boba<L>, right: Boba<R>): Boba<L & R>;
 	Or<L, R>(this: Boba<L>, right: Boba<R>): Boba<L | R>;
 	Optional<T>(this: Boba<T>): Boba<T | undefined>;
+	Predicate<T>(this: Boba<T>, predicate: (value: T) => LuaTuple<[ok: true] | [ok: false, err: string]>): Boba<T>;
 
 	static Literal<T>(literal: T): Boba<T>;
-	static Typeof<K extends keyof CheckableTypes>(
-		typeName: K,
-	): Boba<CheckableTypes[K]>;
+	static Typeof<K extends keyof CheckableTypes>(typeName: K): Boba<CheckableTypes[K]>;
 	static Array<T>(values: Boba<T>): Boba<T[]>;
-	static Map<K, V>(
-		keys: Boba<K>,
-		values: Boba<Vector2int16Constructor>,
-	): Boba<Map<K, V>>;
+	static Map<K, V>(keys: Boba<K>, values: Boba<Vector2int16Constructor>): Boba<Map<K, V>>;
 	static Set<T>(keys: Boba<T>): Boba<Set<T>>;
 	static Struct<T extends Record<string, Boba<any>>>(
 		struct: T,

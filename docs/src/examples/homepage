@@ -1,0 +1,12 @@
+local DamageAmount = Boba.String
+	:Or(Boba.Literal("Lethal"))
+	:Or(Boba.Nil)
+	:Nickname("DamageAmount")
+
+local Turret = Boba.Struct({
+	damage = DamageAmount.inner,
+	interval = Boba.Number.inner,
+})
+
+local unknownData = { damage = "Deadly", interval = 0.5 }
+Turret:assert(unknownData)

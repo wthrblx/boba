@@ -32,6 +32,119 @@ export type Boba<T> = Boba.Boba<T>
 export type Result = Boba.Result
 
 local ext = {}
+
+-- boba: start roblox data types codegen
+ext.Axes = Boba.Typeof("Axes") :: Boba<Axes>
+ext.BrickColor = Boba.Typeof("BrickColor") :: Boba<BrickColor>
+ext.CatalogSearchParams = Boba.Typeof("CatalogSearchParams") :: Boba<CatalogSearchParams>
+ext.CFrame = Boba.Typeof("CFrame") :: Boba<CFrame>
+ext.Color3 = Boba.Typeof("Color3") :: Boba<Color3>
+ext.ColorSequence = Boba.Typeof("ColorSequence") :: Boba<ColorSequence>
+ext.ColorSequenceKeypoint = Boba.Typeof("ColorSequenceKeypoint") :: Boba<ColorSequenceKeypoint>
+ext.Content = Boba.Typeof("Content") :: Boba<Content>
+ext.DateTime = Boba.Typeof("DateTime") :: Boba<DateTime>
+ext.DockWidgetPluginGuiInfo = Boba.Typeof("DockWidgetPluginGuiInfo") :: Boba<DockWidgetPluginGuiInfo>
+ext.Enum = Boba.Typeof("Enum") :: Boba<Enum>
+ext.EnumItem = Boba.Typeof("EnumItem") :: Boba<EnumItem>
+ext.Enums = Boba.Typeof("Enums") :: Boba<Enums>
+ext.Faces = Boba.Typeof("Faces") :: Boba<Faces>
+ext.FloatCurveKey = Boba.Typeof("FloatCurveKey") :: Boba<FloatCurveKey>
+ext.Font = Boba.Typeof("Font") :: Boba<Font>
+ext.Instance = Boba.Typeof("Instance") :: Boba<Instance>
+ext.NumberRange = Boba.Typeof("NumberRange") :: Boba<NumberRange>
+ext.NumberSequence = Boba.Typeof("NumberSequence") :: Boba<NumberSequence>
+ext.NumberSequenceKeypoint = Boba.Typeof("NumberSequenceKeypoint") :: Boba<NumberSequenceKeypoint>
+ext.OverlapParams = Boba.Typeof("OverlapParams") :: Boba<OverlapParams>
+ext.Path2DControlPoint = Boba.Typeof("Path2DControlPoint") :: Boba<Path2DControlPoint>
+ext.PathWaypoint = Boba.Typeof("PathWaypoint") :: Boba<PathWaypoint>
+ext.PhysicalProperties = Boba.Typeof("PhysicalProperties") :: Boba<PhysicalProperties>
+ext.Random = Boba.Typeof("Random") :: Boba<Random>
+ext.Ray = Boba.Typeof("Ray") :: Boba<Ray>
+ext.RaycastParams = Boba.Typeof("RaycastParams") :: Boba<RaycastParams>
+ext.RaycastResult = Boba.Typeof("RaycastResult") :: Boba<RaycastResult>
+ext.RBXScriptConnection = Boba.Typeof("RBXScriptConnection") :: Boba<RBXScriptConnection>
+ext.RBXScriptSignal = Boba.Typeof("RBXScriptSignal") :: Boba<RBXScriptSignal>
+ext.Rect = Boba.Typeof("Rect") :: Boba<Rect>
+ext.Region3 = Boba.Typeof("Region3") :: Boba<Region3>
+ext.Region3int16 = Boba.Typeof("Region3int16") :: Boba<Region3int16>
+ext.RotationCurveKey = Boba.Typeof("RotationCurveKey") :: Boba<RotationCurveKey>
+ext.Secret = Boba.Typeof("Secret") :: Boba<Secret>
+ext.SharedTable = Boba.Typeof("SharedTable") :: Boba<SharedTable>
+ext.TweenInfo = Boba.Typeof("TweenInfo") :: Boba<TweenInfo>
+ext.UDim = Boba.Typeof("UDim") :: Boba<UDim>
+ext.UDim2 = Boba.Typeof("UDim2") :: Boba<UDim2>
+ext.ValueCurveKey = Boba.Typeof("ValueCurveKey") :: Boba<ValueCurveKey>
+ext.Vector2 = Boba.Typeof("Vector2") :: Boba<Vector2>
+ext.Vector2int16 = Boba.Typeof("Vector2int16") :: Boba<Vector2int16>
+ext.Vector3 = Boba.Typeof("Vector3") :: Boba<Vector3>
+ext.Vector3int16 = Boba.Typeof("Vector3int16") :: Boba<Vector3int16>
+-- boba: end roblox data types codegen
+
+local function Tree(parentOrChildren: any, maybeChildren: any): Boba<any>
+	local parent: Boba<any> = if maybeChildren then parentOrChildren else ext.Instance :: any
+	local children = maybeChildren or parentOrChildren :: any
+
+	local expectedPairs: { string } = { "[string]: Instance" }
+	for childName, childBoba: Boba<any> in (children :: any) do
+		table.insert(expectedPairs, `{childName}: {childBoba.expectedType}`)
+	end
+
+	return Boba.new(`{parent.expectedType} & \{ {table.concat(expectedPairs, ", ")} \}`, function(self, x)
+		local parentResult = parent:match(x)
+		if not parentResult.ok then
+			return self:fail("as it didn't match the parent type"):because(parentResult)
+		end
+
+		for childName: string, childBoba: Boba<any> in (children :: any) do
+			local realInstance = (x :: Instance):FindFirstChild(childName)
+			local childResult = childBoba:match(realInstance)
+			if not childResult.ok then
+				return self:fail(`didn't match child "{childName}"`):because(childResult)
+			end
+		end
+
+		return Result.ok
+	end)
+end
+
+local function ExhaustiveTree(parentOrChildren: any, maybeChildren: any): Boba<any>
+	local parent: Boba<any> = if maybeChildren then parentOrChildren else ext.Instance :: any
+	local children: any = maybeChildren or parentOrChildren :: any
+
+	local childParts: { string } = {}
+	for childName, childBoba: Boba<any> in (children :: any) do
+		table.insert(childParts, `{childName}: {childBoba.expectedType}`)
+	end
+
+	return Boba.new(`{parent.expectedType} & \{ {table.concat(childParts, ", ")} \}`, function(self, x): Result
+		local parentResult = parent:match(x)
+		if not parentResult.ok then
+			return self:fail("as it didn't match the parent type"):because(parentResult) :: Result
+		end
+
+		for childName: string, childBoba: Boba<any> in (children :: any) do
+			local realInstance = (x :: Instance):FindFirstChild(childName)
+			local childResult = childBoba:match(realInstance)
+			if not childResult.ok then
+				return self:fail(`didn't match child "{childName}"`):because(childResult) :: Result
+			end
+		end
+
+		for _, instance in (x :: Instance):GetChildren() do
+			if not (children :: any)[instance.Name] then
+				return self:fail(`"{instance.Name}" isn't included in exhaustive tree`) :: Result
+			end
+		end
+
+		return Result.ok
+	end)
+end
+
+type Tree = (<C>(children: C) -> Boba<Instance & C>) & (<T, C>(parent: Boba<T>, children: C) -> Boba<T & C>)
+
+ext.Tree = Tree :: Tree
+ext.ExhaustiveTree = ExhaustiveTree :: Tree
+
 ext.IsA = {} :: Instances
 ext.IsClass = {} :: Instances
 
@@ -92,6 +205,7 @@ type Instances = {
 	Animation: Boba<Animation>,
 	AnimationClip: Boba<AnimationClip>,
 	AnimationClipProvider: Boba<AnimationClipProvider>,
+	AnimationConstraint: Boba<AnimationConstraint>,
 	AnimationController: Boba<AnimationController>,
 	AnimationFromVideoCreatorService: Boba<AnimationFromVideoCreatorService>,
 	AnimationFromVideoCreatorStudioService: Boba<AnimationFromVideoCreatorStudioService>,
@@ -139,8 +253,10 @@ type Instances = {
 	AudioPages: Boba<AudioPages>,
 	AudioPitchShifter: Boba<AudioPitchShifter>,
 	AudioPlayer: Boba<AudioPlayer>,
+	AudioRecorder: Boba<AudioRecorder>,
 	AudioReverb: Boba<AudioReverb>,
 	AudioSearchParams: Boba<AudioSearchParams>,
+	AudioSpeechToText: Boba<AudioSpeechToText>,
 	AudioTextToSpeech: Boba<AudioTextToSpeech>,
 	AudioTremolo: Boba<AudioTremolo>,
 	AuroraScriptObject: Boba<AuroraScriptObject>,
@@ -161,11 +277,13 @@ type Instances = {
 	BallSocketConstraint: Boba<BallSocketConstraint>,
 	BanHistoryPages: Boba<BanHistoryPages>,
 	BaseImportData: Boba<BaseImportData>,
+	BasePart: Boba<BasePart>,
 	BasePlayerGui: Boba<BasePlayerGui>,
 	BaseRemoteEvent: Boba<BaseRemoteEvent>,
 	BaseScript: Boba<BaseScript>,
 	BaseWrap: Boba<BaseWrap>,
 	Beam: Boba<Beam>,
+	BevelMesh: Boba<BevelMesh>,
 	BillboardGui: Boba<BillboardGui>,
 	BinaryStringValue: Boba<BinaryStringValue>,
 	BindableEvent: Boba<BindableEvent>,
@@ -205,6 +323,7 @@ type Instances = {
 	CatalogPages: Boba<CatalogPages>,
 	ChangeHistoryService: Boba<ChangeHistoryService>,
 	ChangeHistoryStreamingService: Boba<ChangeHistoryStreamingService>,
+	ChannelSelectorSoundEffect: Boba<ChannelSelectorSoundEffect>,
 	ChannelTabsConfiguration: Boba<ChannelTabsConfiguration>,
 	CharacterAppearance: Boba<CharacterAppearance>,
 	CharacterMesh: Boba<CharacterMesh>,
@@ -265,6 +384,7 @@ type Instances = {
 	CylinderMesh: Boba<CylinderMesh>,
 	CylindricalConstraint: Boba<CylindricalConstraint>,
 	DataModel: Boba<DataModel>,
+	DataModelMesh: Boba<DataModelMesh>,
 	DataModelPatchService: Boba<DataModelPatchService>,
 	DataModelSession: Boba<DataModelSession>,
 	DataStore: Boba<DataStore>,
@@ -282,6 +402,7 @@ type Instances = {
 	DataStoreSetOptions: Boba<DataStoreSetOptions>,
 	DataStoreVersionPages: Boba<DataStoreVersionPages>,
 	Debris: Boba<Debris>,
+	DebugSettings: Boba<DebugSettings>,
 	DebuggablePluginWatcher: Boba<DebuggablePluginWatcher>,
 	DebuggerBreakpoint: Boba<DebuggerBreakpoint>,
 	DebuggerConnection: Boba<DebuggerConnection>,
@@ -326,6 +447,7 @@ type Instances = {
 	Explosion: Boba<Explosion>,
 	FaceAnimatorService: Boba<FaceAnimatorService>,
 	FaceControls: Boba<FaceControls>,
+	FaceInstance: Boba<FaceInstance>,
 	FacialAgeEstimationService: Boba<FacialAgeEstimationService>,
 	FacialAnimationRecordingService: Boba<FacialAnimationRecordingService>,
 	FacialAnimationStreamingServiceStats: Boba<FacialAnimationStreamingServiceStats>,
@@ -353,6 +475,7 @@ type Instances = {
 	FriendService: Boba<FriendService>,
 	FunctionalTest: Boba<FunctionalTest>,
 	GamePassService: Boba<GamePassService>,
+	GameSettings: Boba<GameSettings>,
 	GamepadService: Boba<GamepadService>,
 	GenerationService: Boba<GenerationService>,
 	GenericChallengeService: Boba<GenericChallengeService>,
@@ -361,17 +484,22 @@ type Instances = {
 	GeometryService: Boba<GeometryService>,
 	GetTextBoundsParams: Boba<GetTextBoundsParams>,
 	GlobalDataStore: Boba<GlobalDataStore>,
+	GlobalSettings: Boba<GlobalSettings>,
 	Glue: Boba<Glue>,
 	GroundController: Boba<GroundController>,
 	GroupImportData: Boba<GroupImportData>,
 	GroupService: Boba<GroupService>,
 	GuiBase: Boba<GuiBase>,
+	GuiBase2d: Boba<GuiBase2d>,
 	GuiBase3d: Boba<GuiBase3d>,
+	GuiButton: Boba<GuiButton>,
 	GuiLabel: Boba<GuiLabel>,
 	GuiMain: Boba<GuiMain>,
+	GuiObject: Boba<GuiObject>,
 	GuiService: Boba<GuiService>,
 	GuidRegistryService: Boba<GuidRegistryService>,
 	HSRDataContentProvider: Boba<HSRDataContentProvider>,
+	HandRigDescription: Boba<HandRigDescription>,
 	HandleAdornment: Boba<HandleAdornment>,
 	Handles: Boba<Handles>,
 	HandlesBase: Boba<HandlesBase>,
@@ -395,6 +523,7 @@ type Instances = {
 	Humanoid: Boba<Humanoid>,
 	HumanoidController: Boba<HumanoidController>,
 	HumanoidDescription: Boba<HumanoidDescription>,
+	HumanoidRigDescription: Boba<HumanoidRigDescription>,
 	IKControl: Boba<IKControl>,
 	ILegacyStudioBridge: Boba<ILegacyStudioBridge>,
 	IXPService: Boba<IXPService>,
@@ -408,6 +537,7 @@ type Instances = {
 	InputContext: Boba<InputContext>,
 	InputObject: Boba<InputObject>,
 	InsertService: Boba<InsertService>,
+	Instance: Boba<Instance>,
 	InstanceAdornment: Boba<InstanceAdornment>,
 	InstanceExtensionsService: Boba<InstanceExtensionsService>,
 	IntConstrainedValue: Boba<IntConstrainedValue>,
@@ -424,6 +554,7 @@ type Instances = {
 	KeyframeSequenceProvider: Boba<KeyframeSequenceProvider>,
 	LSPFileSyncService: Boba<LSPFileSyncService>,
 	LanguageService: Boba<LanguageService>,
+	LayerCollector: Boba<LayerCollector>,
 	LegacyStudioBridge: Boba<LegacyStudioBridge>,
 	Light: Boba<Light>,
 	Lighting: Boba<Lighting>,
@@ -444,6 +575,7 @@ type Instances = {
 	LogService: Boba<LogService>,
 	LoginService: Boba<LoginService>,
 	LuaSettings: Boba<LuaSettings>,
+	LuaSourceContainer: Boba<LuaSourceContainer>,
 	LuaWebService: Boba<LuaWebService>,
 	LuauScriptAnalyzerService: Boba<LuauScriptAnalyzerService>,
 	MLModelDeliveryService: Boba<MLModelDeliveryService>,
@@ -488,8 +620,11 @@ type Instances = {
 	MultipleDocumentInterfaceInstance: Boba<MultipleDocumentInterfaceInstance>,
 	NegateOperation: Boba<NegateOperation>,
 	NetworkClient: Boba<NetworkClient>,
+	NetworkMarker: Boba<NetworkMarker>,
+	NetworkPeer: Boba<NetworkPeer>,
 	NetworkReplicator: Boba<NetworkReplicator>,
 	NetworkServer: Boba<NetworkServer>,
+	NetworkSettings: Boba<NetworkSettings>,
 	NoCollisionConstraint: Boba<NoCollisionConstraint>,
 	Noise: Boba<Noise>,
 	NonReplicatedCSGDictionaryService: Boba<NonReplicatedCSGDictionaryService>,
@@ -505,6 +640,8 @@ type Instances = {
 	OrderedDataStore: Boba<OrderedDataStore>,
 	OutfitPages: Boba<OutfitPages>,
 	PVAdornment: Boba<PVAdornment>,
+	PVInstance: Boba<PVInstance>,
+	PackageLink: Boba<PackageLink>,
 	PackageService: Boba<PackageService>,
 	PackageUIService: Boba<PackageUIService>,
 	Pages: Boba<Pages>,
@@ -575,6 +712,7 @@ type Instances = {
 	PrismaticConstraint: Boba<PrismaticConstraint>,
 	ProcessInstancePhysicsService: Boba<ProcessInstancePhysicsService>,
 	ProximityPrompt: Boba<ProximityPrompt>,
+	ProximityPromptService: Boba<ProximityPromptService>,
 	PublishService: Boba<PublishService>,
 	QWidgetPluginGui: Boba<QWidgetPluginGui>,
 	RTAnimationTracker: Boba<RTAnimationTracker>,
@@ -602,6 +740,7 @@ type Instances = {
 	RemoteDebuggerServer: Boba<RemoteDebuggerServer>,
 	RemoteEvent: Boba<RemoteEvent>,
 	RemoteFunction: Boba<RemoteFunction>,
+	RenderSettings: Boba<RenderSettings>,
 	RenderingTest: Boba<RenderingTest>,
 	ReplicatedFirst: Boba<ReplicatedFirst>,
 	ReplicatedStorage: Boba<ReplicatedStorage>,
@@ -609,6 +748,7 @@ type Instances = {
 	RibbonNotificationService: Boba<RibbonNotificationService>,
 	RigidConstraint: Boba<RigidConstraint>,
 	RobloxPluginGuiService: Boba<RobloxPluginGuiService>,
+	RobloxReplicatedStorage: Boba<RobloxReplicatedStorage>,
 	RobloxSerializableInstance: Boba<RobloxSerializableInstance>,
 	RobloxServerStorage: Boba<RobloxServerStorage>,
 	RocketPropulsion: Boba<RocketPropulsion>,
@@ -660,6 +800,7 @@ type Instances = {
 	ServerReplicator: Boba<ServerReplicator>,
 	ServerScriptService: Boba<ServerScriptService>,
 	ServerStorage: Boba<ServerStorage>,
+	ServiceProvider: Boba<ServiceProvider>,
 	ServiceVisibilityService: Boba<ServiceVisibilityService>,
 	SessionCheckService: Boba<SessionCheckService>,
 	SessionService: Boba<SessionService>,
@@ -727,6 +868,7 @@ type Instances = {
 	StyleBase: Boba<StyleBase>,
 	StyleDerive: Boba<StyleDerive>,
 	StyleLink: Boba<StyleLink>,
+	StyleQuery: Boba<StyleQuery>,
 	StyleRule: Boba<StyleRule>,
 	StyleSheet: Boba<StyleSheet>,
 	StylingService: Boba<StylingService>,
@@ -787,6 +929,7 @@ type Instances = {
 	TorsionSpringConstraint: Boba<TorsionSpringConstraint>,
 	TotalCountTimeIntervalItem: Boba<TotalCountTimeIntervalItem>,
 	TouchInputService: Boba<TouchInputService>,
+	TouchTransmitter: Boba<TouchTransmitter>,
 	TracerService: Boba<TracerService>,
 	TrackerLodController: Boba<TrackerLodController>,
 	TrackerStreamAnimation: Boba<TrackerStreamAnimation>,
@@ -797,6 +940,7 @@ type Instances = {
 	TrussPart: Boba<TrussPart>,
 	TutorialService: Boba<TutorialService>,
 	Tween: Boba<Tween>,
+	TweenBase: Boba<TweenBase>,
 	TweenService: Boba<TweenService>,
 	UGCAvatarService: Boba<UGCAvatarService>,
 	UGCValidationService: Boba<UGCValidationService>,
@@ -810,6 +954,7 @@ type Instances = {
 	UIFlexItem: Boba<UIFlexItem>,
 	UIGradient: Boba<UIGradient>,
 	UIGridLayout: Boba<UIGridLayout>,
+	UIGridStyleLayout: Boba<UIGridStyleLayout>,
 	UILayout: Boba<UILayout>,
 	UIListLayout: Boba<UIListLayout>,
 	UIPadding: Boba<UIPadding>,
@@ -842,7 +987,9 @@ type Instances = {
 	VideoCapture: Boba<VideoCapture>,
 	VideoCaptureService: Boba<VideoCaptureService>,
 	VideoDeviceInput: Boba<VideoDeviceInput>,
+	VideoDisplay: Boba<VideoDisplay>,
 	VideoFrame: Boba<VideoFrame>,
+	VideoPlayer: Boba<VideoPlayer>,
 	VideoService: Boba<VideoService>,
 	ViewportFrame: Boba<ViewportFrame>,
 	VirtualInputManager: Boba<VirtualInputManager>,
@@ -852,6 +999,7 @@ type Instances = {
 	VisualizationMode: Boba<VisualizationMode>,
 	VisualizationModeCategory: Boba<VisualizationModeCategory>,
 	VisualizationModeService: Boba<VisualizationModeService>,
+	VoiceChatInternal: Boba<VoiceChatInternal>,
 	VoiceChatService: Boba<VoiceChatService>,
 	WebSocketClient: Boba<WebSocketClient>,
 	WebSocketService: Boba<WebSocketService>,
@@ -869,55 +1017,9 @@ type Instances = {
 	WrapDeformer: Boba<WrapDeformer>,
 	WrapLayer: Boba<WrapLayer>,
 	WrapTarget: Boba<WrapTarget>,
+	WrapTextureTransfer: Boba<WrapTextureTransfer>,
 }
 -- boba: end roblox instances typegen
-
--- boba: start roblox data types codegen
-ext.Axes = Boba.Typeof("Axes") :: Boba<Axes>
-ext.BrickColor = Boba.Typeof("BrickColor") :: Boba<BrickColor>
-ext.CatalogSearchParams = Boba.Typeof("CatalogSearchParams") :: Boba<CatalogSearchParams>
-ext.CFrame = Boba.Typeof("CFrame") :: Boba<CFrame>
-ext.Color3 = Boba.Typeof("Color3") :: Boba<Color3>
-ext.ColorSequence = Boba.Typeof("ColorSequence") :: Boba<ColorSequence>
-ext.ColorSequenceKeypoint = Boba.Typeof("ColorSequenceKeypoint") :: Boba<ColorSequenceKeypoint>
-ext.Content = Boba.Typeof("Content") :: Boba<Content>
-ext.DateTime = Boba.Typeof("DateTime") :: Boba<DateTime>
-ext.DockWidgetPluginGuiInfo = Boba.Typeof("DockWidgetPluginGuiInfo") :: Boba<DockWidgetPluginGuiInfo>
-ext.Enum = Boba.Typeof("Enum") :: Boba<Enum>
-ext.EnumItem = Boba.Typeof("EnumItem") :: Boba<EnumItem>
-ext.Enums = Boba.Typeof("Enums") :: Boba<Enums>
-ext.Faces = Boba.Typeof("Faces") :: Boba<Faces>
-ext.FloatCurveKey = Boba.Typeof("FloatCurveKey") :: Boba<FloatCurveKey>
-ext.Font = Boba.Typeof("Font") :: Boba<Font>
-ext.Instance = Boba.Typeof("Instance") :: Boba<Instance>
-ext.NumberRange = Boba.Typeof("NumberRange") :: Boba<NumberRange>
-ext.NumberSequence = Boba.Typeof("NumberSequence") :: Boba<NumberSequence>
-ext.NumberSequenceKeypoint = Boba.Typeof("NumberSequenceKeypoint") :: Boba<NumberSequenceKeypoint>
-ext.OverlapParams = Boba.Typeof("OverlapParams") :: Boba<OverlapParams>
-ext.Path2DControlPoint = Boba.Typeof("Path2DControlPoint") :: Boba<Path2DControlPoint>
-ext.PathWaypoint = Boba.Typeof("PathWaypoint") :: Boba<PathWaypoint>
-ext.PhysicalProperties = Boba.Typeof("PhysicalProperties") :: Boba<PhysicalProperties>
-ext.Random = Boba.Typeof("Random") :: Boba<Random>
-ext.Ray = Boba.Typeof("Ray") :: Boba<Ray>
-ext.RaycastParams = Boba.Typeof("RaycastParams") :: Boba<RaycastParams>
-ext.RaycastResult = Boba.Typeof("RaycastResult") :: Boba<RaycastResult>
-ext.RBXScriptConnection = Boba.Typeof("RBXScriptConnection") :: Boba<RBXScriptConnection>
-ext.RBXScriptSignal = Boba.Typeof("RBXScriptSignal") :: Boba<RBXScriptSignal>
-ext.Rect = Boba.Typeof("Rect") :: Boba<Rect>
-ext.Region3 = Boba.Typeof("Region3") :: Boba<Region3>
-ext.Region3int16 = Boba.Typeof("Region3int16") :: Boba<Region3int16>
-ext.RotationCurveKey = Boba.Typeof("RotationCurveKey") :: Boba<RotationCurveKey>
-ext.Secret = Boba.Typeof("Secret") :: Boba<Secret>
-ext.SharedTable = Boba.Typeof("SharedTable") :: Boba<SharedTable>
-ext.TweenInfo = Boba.Typeof("TweenInfo") :: Boba<TweenInfo>
-ext.UDim = Boba.Typeof("UDim") :: Boba<UDim>
-ext.UDim2 = Boba.Typeof("UDim2") :: Boba<UDim2>
-ext.ValueCurveKey = Boba.Typeof("ValueCurveKey") :: Boba<ValueCurveKey>
-ext.Vector2 = Boba.Typeof("Vector2") :: Boba<Vector2>
-ext.Vector2int16 = Boba.Typeof("Vector2int16") :: Boba<Vector2int16>
-ext.Vector3 = Boba.Typeof("Vector3") :: Boba<Vector3>
-ext.Vector3int16 = Boba.Typeof("Vector3int16") :: Boba<Vector3int16>
--- boba: end roblox data types codegen
 
 local Roblox: typeof(Boba) & typeof(ext) = {} :: any
 for _, exports in { Boba, ext } :: { any } do

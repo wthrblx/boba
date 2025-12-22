@@ -105,16 +105,16 @@ Boba.quote = quote
 Boba.quoteGot = quoteGot
 
 export type BobaInner<T> = {
-	expected: string,
+	expectedType: string,
 	match: (self: Boba<T>, x: unknown) -> Result,
 	inner: T,
 }
 
 export type Boba<T> = typeof(setmetatable({} :: BobaInner<T>, Boba))
 
-function Boba.new<T>(expected: string, match: (self: Boba<T>, x: any) -> Result): Boba<T>
+function Boba.new<T>(expectedType: string, match: (self: Boba<T>, x: any) -> Result): Boba<T>
 	local self = setmetatable({
-		expected = expected,
+		expectedType = expectedType,
 		match = match,
 	}, Boba)
 	self.inner = self :: any
@@ -128,7 +128,11 @@ function Boba.__call(self: any, x: any): Result
 end
 
 function Boba.__tostring(self: Boba<any>)
-	return `Boba<{self.expected}>`
+	return `Boba<{self.expectedType}>`
+end
+
+function Boba.isMatch<T>(self: Boba<T>, x: any): boolean
+	return self:match(x).ok
 end
 
 function Boba.cast<T>(self: Boba<T>, x: any): T?
@@ -141,7 +145,7 @@ function Boba.assert<T>(self: Boba<T>, x: any): T
 end
 
 function Boba.fail(self: Boba<any>, message: string)
-	return Result.fail(self.expected, message)
+	return Result.fail(self.expectedType, message)
 end
 
 function Boba.Nickname<T>(self: Boba<T>, name: string): Boba<T>
@@ -157,7 +161,7 @@ function Boba.Untype<T>(self: Boba<T>): Boba<any>
 end
 
 function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
-	return Boba.new(`({left.expected}) & ({right.expected})`, function(self, x)
+	return Boba.new(`({left.expectedType}) & ({right.expectedType})`, function(self, x)
 		local leftResult = left:match(x)
 		if leftResult.ok then
 			local rightResult = right:match(x)
@@ -170,20 +174,20 @@ function Boba.And<L, R>(left: Boba<L>, right: Boba<R>): Boba<L & R>
 end
 
 function Boba.Or<L, R>(left: Boba<L>, right: Boba<R>): Boba<L | R>
-	return Boba.new(`{left.expected} | {right.expected}`, function(self, x)
+	return Boba.new(`{left.expectedType} | {right.expectedType}`, function(self, x)
 		local leftResult = left:match(x)
 		local rightResult = right:match(x)
 		if leftResult.ok or rightResult.ok then
 			return Result.ok
 		end
-		return self:fail(`did not match any of: {left.expected}, {right.expected}`)
+		return self:fail(`did not match any of: {left.expectedType}, {right.expectedType}`)
 			:because(leftResult)
 			:because(rightResult)
 	end)
 end
 
 function Boba.Optional<T>(inner: Boba<T>): Boba<T?>
-	return Boba.new(`({inner.expected})?`, function(self, x)
+	return Boba.new(`({inner.expectedType})?`, function(self, x)
 		if x == nil then
 			return Result.ok
 		end
@@ -192,7 +196,7 @@ function Boba.Optional<T>(inner: Boba<T>): Boba<T?>
 end
 
 function Boba.Predicate<T>(inner: Boba<T>, predicate: (value: T) -> (boolean, string?)): Boba<T>
-	return Boba.new(`Predicate<{inner.expected}>`, function(self, x)
+	return Boba.new(`Predicate<{inner.expectedType}>`, function(self, x)
 		local innerResult = inner:match(x)
 
 		if innerResult.ok then
@@ -221,7 +225,7 @@ function Boba.Typeof<T>(expected: string)
 end
 
 function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
-	return Boba.new(`\{ {values.expected} \}`, function(self, x)
+	return Boba.new(`\{ {values.expectedType} \}`, function(self, x)
 		if typeof(x) ~= "table" then
 			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
@@ -247,7 +251,7 @@ function Boba.Array<V>(values: Boba<V>): Boba<{ V }>
 end
 
 function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
-	return Boba.new(`\{ [{keys.expected}]: {values.expected} \}`, function(self, x)
+	return Boba.new(`\{ [{keys.expectedType}]: {values.expectedType} \}`, function(self, x)
 		if typeof(x) ~= "table" then
 			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
@@ -269,7 +273,7 @@ function Boba.Map<K, V>(keys: Boba<K>, values: Boba<V>): Boba<{ [K]: V }>
 end
 
 function Boba.Set<K>(keys: Boba<K>): Boba<{ [K]: true }>
-	return Boba.new(`\{ [{keys.expected}]: true \}`, function(self, x)
+	return Boba.new(`\{ [{keys.expectedType}]: true \}`, function(self, x)
 		if typeof(x) ~= "table" then
 			return self:fail(`expected a table, but {quoteGot(x)}`)
 		end
@@ -293,7 +297,7 @@ function Boba.Struct<T>(struct: T & { [string]: Boba<any> }): Boba<T>
 	local expectedPairs = { "[any]: any" }
 	for key, value in struct :: { [string]: Boba<any> } do
 		-- TODO: key could be better formatted here
-		table.insert(expectedPairs, `{key}: {value.expected}`)
+		table.insert(expectedPairs, `{key}: {value.expectedType}`)
 	end
 
 	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x)
@@ -317,7 +321,7 @@ function Boba.ExhaustiveStruct<T>(struct: T): Boba<T>
 	local expectedPairs = {}
 	for key, value in (struct :: any) :: { [string]: Boba<any> } do
 		-- TODO: key could be better formatted here
-		table.insert(expectedPairs, `{key}: {value.expected}`)
+		table.insert(expectedPairs, `{key}: {value.expectedType}`)
 	end
 
 	return Boba.new(`\{ {table.concat(expectedPairs, ", ")} \}`, function(self, x)

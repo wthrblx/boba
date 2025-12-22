@@ -1,0 +1,112 @@
+---
+title: Installation
+description: Boba can be installed standalone or with a package manager.
+---
+
+import { Steps, LinkButton, Tabs, TabItem } from "@astrojs/starlight/components"
+
+Boba can be installed standalone or with a package manager.
+
+## Wally
+
+```toml title="wally.toml"
+[dependencies]
+Boba = "team-fireworks/boba@0.1.0"
+BobaRoblox = "team-fireworks/boba@0.1.0"
+# soon!
+t = "team-fireworks/boba-t@0.1.0"
+ty = "team-fireworks/boba-ty@0.1.0"
+GreenTea = "team-fireworks/boba-greentea@0.1.0"
+```
+
+:::caution
+
+Due to sheer negligence, Wally does not export type definitions for Boba. To use
+the `Boba<T>` type in your code, run the
+[`wally-package-types`](https://github.com/JohnnyMorganz/wally-package-types)
+tool:
+
+```sh
+rokit install JohnnyMorganz/wally-package-types
+rojo sourcemap default.project.json --output sourcemap.json
+wally-package-types --sourcemap sourcemap.json Packages/
+```
+
+It may help to automate this, though this is outside the scope of Boba.
+
+:::
+
+## pesde
+
+```sh
+pesde install team_fireworks/boba
+pesde install team_fireworks/boba_roblox
+# soon!
+pesde install team_fireworks/boba_t
+pesde install team_fireworks/boba_ty
+pesde install team_fireworks/boba_greentea
+```
+
+Alternatively, add to your `pesde.toml`:
+
+```toml title="pesde.toml"
+[dependencies]
+Boba = { name = "team_fireworks/boba", version = "^0.1" }
+BobaRoblox = { name = "team_fireworks/boba-roblox", version = "^0.1" }
+# soon!
+t = { name = "team_fireworks/boba-t", version = "^0.1" }
+ty = { name = "team_fireworks/boba-ty", version = "^0.1" }
+GreenTea = { name = "team_fireworks/boba-greentea", version = "^0.1" }
+```
+
+## rbxts
+
+<Tabs>
+	<TabItem label="npm">
+	  	```sh
+	   	npm install @rbxts/boba
+	   	npm install @rbxts/boba-roblox
+		# soon!
+	   	npm install @rbxts/boba-t
+	   	npm install @rbxts/boba-ty
+	   	npm install @rbxts/boba-greentea
+	    ```
+	</TabItem>
+	<TabItem label="bun">
+	  	```sh
+	   	bun install @rbxts/boba
+	   	bun install @rbxts/boba-roblox
+		# soon!
+	   	bun install @rbxts/boba-t
+	   	bun install @rbxts/boba-ty
+	   	bun install @rbxts/boba-greentea
+	    ```
+	</TabItem>
+	<TabItem label="pnpm">
+	  	```sh
+	   	pnpm install @rbxts/boba
+	   	pnpm install @rbxts/boba-roblox
+		# soon!
+	   	pnpm install @rbxts/boba-t
+	   	pnpm install @rbxts/boba-ty
+	   	pnpm install @rbxts/boba-greentea
+	    ```
+	</TabItem>
+	<TabItem label="yarn">
+	  	```sh
+	   	yarn add @rbxts/boba
+	   	yarn add @rbxts/boba-roblox
+		# soon!
+	   	yarn add @rbxts/boba-t
+	   	yarn add @rbxts/boba-ty
+	   	yarn add @rbxts/boba-greentea
+	    ```
+	</TabItem>
+</Tabs>
+
+## Standalone
+
+Roblox model files and pre-build packages are availible on our GitHub
+Releases:
+
+<LinkButton href="https://github.com/wthrblx/boba/releases" icon="github">GitHub Releases</LinkButton>

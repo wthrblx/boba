@@ -1,0 +1,47 @@
+.sl-link-button {
+	border: none;
+	border-radius: 0.75rem !important;
+	transition: background-color 100ms ease-in;
+}
+
+.sl-link-button.primary:hover {
+	background-color: color-mix(in hsl, var(--sl-color-accent-high) 100%, var(--sl-color-accent) 50%);
+}
+
+.sl-link-button.secondary {
+	background-color: var(--sl-color-gray-6);
+	color: var(--sl-color-accent-high);
+}
+
+.sl-link-button.secondary:hover {
+	background-color: var(--sl-color-gray-5);
+}
+
+.boba-example {
+	--border-radius: 0.75rem;
+	display: grid;
+	border-radius: var(--border-radius);
+	overflow: hidden;
+	position: relative;
+}
+
+.boba-example::after {
+	content: "";
+	display: block;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+
+	border-radius: var(--border-radius);
+	border: var(--ec-brdWd) solid var(--ec-brdCol);
+}
+
+@media (min-width: 70rem) {
+	.boba-example {
+		grid-template-columns: 50% 50%;
+	}
+}
+
+.boba-example .expressive-code {
+	margin: 0;
+}

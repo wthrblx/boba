@@ -21,13 +21,23 @@
 
 */
 
-import { Boba as Base } from "../boba";
+import { Boba as Base } from "@rbxts/boba";
+export { Result, quote, quoteGot } from "@rbxts/boba";
 
 type InstanceClasses = { [K in keyof Instances]: Boba<Instances[K]> };
 
 export class Boba<T> extends Base<T> {
 	static IsA: InstanceClasses;
 	static IsClass: InstanceClasses;
+
+	static Tree<T extends Instance, C extends Record<string, unknown>>(
+		parent: Boba<T>,
+		children: C,
+	): Boba<T & { [K in keyof C]: C[K] extends Boba<infer U> ? U : C[K] }>;
+	static ExhaustiveTree<T extends Instance, C extends Record<string, unknown>>(
+		parent: Boba<T>,
+		children: C,
+	): Boba<T & { [K in keyof C]: C[K] extends Boba<infer U> ? U : C[K] }>;
 
 	static Axes: Boba<Axes>;
 	static BrickColor: Boba<BrickColor>;

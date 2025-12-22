@@ -5,7 +5,6 @@
   },
   "aliases": {
     "lune": "~/.lune/.typedefs/0.10.4/",
-    "configure": "./.lune/lib/configure/",
     "lib": "./.lune/lib/"
   }
 }
